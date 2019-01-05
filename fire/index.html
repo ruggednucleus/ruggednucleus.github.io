@@ -4,16 +4,17 @@
     <meta charset="utf-8" />
     <title>Page Title</title>
     <script src="main.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body>
-    <canvas id="canvas" style="background-color: black"></canvas>
+<body style="background-color: black;">
+    <canvas id="canvas" style="position: absolute; bottom: 0; left: 0;"></canvas>
     </canvas>
     <script>
 
         let on = false;
 
-        let width = 400;
-        let height = 260;
+        let width = window.outerWidth;
+        let height = 200;
 
         let canvas = document.getElementById("canvas");
         canvas.width = width;
@@ -38,7 +39,7 @@
             ctx.putImageData(fire.render(), 0, 0);
         }, 1000 / 30);
 
-        canvas.addEventListener("click", function() {
+        document.addEventListener("click", function() {
             if(on) {
                 fire.turnOff();
                 on = false;
