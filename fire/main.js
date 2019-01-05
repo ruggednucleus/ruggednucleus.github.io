@@ -27,8 +27,6 @@ function Fire(imageData, width, height, colors) {
         }
     }
 
-    let updateTime = 0;
-
     return {
         turnOn: function() {
             for(let x = 0; x < width; x++) {
@@ -43,17 +41,11 @@ function Fire(imageData, width, height, colors) {
         },
 
         render: function() {
-            let dt = performance.now();
             update();
             draw();
-            updateTime = performance.now() - dt;
             return imageData;
         },
-
-        time: function() {
-            return updateTime;
-        },
-
+        
         firePixels: firePixels,
     }
 }

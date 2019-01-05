@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body style="background-color: black;">
-    <p id="time" style="color: white; font-size: 10em; text-align: center;">0</p>
     <canvas id="canvas" style="position: absolute; bottom: 0; left: 0;"></canvas>
     </canvas>
     <script>
@@ -35,10 +34,8 @@
         }
 
         let fire = Fire(ctx.createImageData(width, height), width, height, colors);
-        let time = document.getElementById("time");
         setInterval(function() {
             ctx.putImageData(fire.render(), 0, 0);
-            time.innerText = fire.time() | 0;
         }, 1000 / 30);
 
         document.addEventListener("click", function() {
