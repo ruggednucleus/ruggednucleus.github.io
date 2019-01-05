@@ -47,7 +47,6 @@ function Fire(imageData, width, height, colors) {
             update();
             draw();
             updateTime = performance.now() - dt;
-            console.log(updateTime)
             return imageData;
         },
 
