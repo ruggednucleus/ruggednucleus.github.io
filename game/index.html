@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="main.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div style="width: 50px; height: 50px; background-color: black"></div>
+    <script>
+    
+        let size = 20;
+
+        let canvas = document.getElementById("canvas");
+        canvas.width = 7 * size;
+        canvas.height = 10 * size;
+
+        let ctx = canvas.getContext("2d");
+
+        let game = Game(ctx, canvas.width, canvas.height);
+
+        canvas.addEventListener("click", function(e) {
+            let x = e.pageX - canvas.offsetLeft;
+            let y = e.pageY - canvas.offsetTop;
+            game.click(x, y);
+        });
+
+    </script>
+</body>
+</html>
