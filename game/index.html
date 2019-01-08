@@ -7,7 +7,7 @@
 </head>
 <body>
     <p id="debug" style="font-size: 24px;"></p>
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" style="position: absolute; left: 50%; transform: translate(-50%, 0%)"></canvas>
     <img src="puyo_scaled.png" id="img" style="display: none">
     <script>
 
@@ -16,7 +16,7 @@
         debug.innerText += "outerHeight = " + window.outerHeight + "px\n";
 
         let game;
-        let size = 64;
+        let size = 48;
 
         let canvas = document.getElementById("canvas");
         canvas.width = 7 * size;
