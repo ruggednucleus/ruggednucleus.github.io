@@ -1,4 +1,4 @@
-function Game(ctx, canvas_width, canvas_height) {
+function Game(ctx, canvas_width, canvas_height, sprites) {
     let width = 7;
     let max_height = 10;
     let start_height = 4;
@@ -7,15 +7,7 @@ function Game(ctx, canvas_width, canvas_height) {
     let cell_width = canvas_width / width | 0;
     let cell_height = canvas_height / max_height | 0;
 
-    let colors = [
-        {color: "red"},
-        {color: "green"},
-        {color: "blue"},
-        {color: "yellow"},
-        {color: "purple"},
-    ];
-
-    let board = Board(width, start_height, colors, max_neighbors);
+    let board = Board(width, start_height, sprites, max_neighbors);
     let to_remove = [];
 
     let held_cell = undefined;
@@ -45,11 +37,13 @@ function Game(ctx, canvas_width, canvas_height) {
         
         for(let x = 0; x < b.length; x++) {
             for(let y = 0; y < b[x].length; y++) {
-                ctx.fillStyle = b[x][y].color;
-                ctx.fillRect(x * cell_width, y * cell_height, cell_width, cell_height);
+                let cell = b[x][y];
+                ctx.putImageData(cell.frames[0], x * cell_width, y * cell_height);
             }
         }
     }
+
+    let last_update = performance.now();
 
     function render() {
         if(to_remove.length) {
@@ -100,7 +94,7 @@ function Board(width, height, cells, max_neighbors) {
     function add_line(cells, max_neighbors) {
         for(let i = 0; i < width; i++) {
             let cell = cells[Math.random() * cells.length | 0];
-            board[i].unshift(Cell(cell.color));
+            board[i].unshift(Cell(cell));
             if(find_neighbors(i, 0).length > max_neighbors) {
                 board[i].shift();
                 i--;
@@ -243,8 +237,11 @@ function Board(width, height, cells, max_neighbors) {
     }
 }
 
-function Cell(color) {
+function Cell(data) {
+    let color = data.color;
+    let frames = data.frames;
     return {
         color: color,
+        frames: frames,
     }
 }
