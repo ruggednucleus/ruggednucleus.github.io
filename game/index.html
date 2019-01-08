@@ -48,7 +48,7 @@
          
 
         canvas.addEventListener("click", function(e) {
-            let x = e.pageX - canvas.offsetLeft;
+            let x = e.pageX - (canvas.offsetLeft - canvas.width / 2);
             let y = e.pageY - canvas.offsetTop;
             game.click(x, y);
         });
