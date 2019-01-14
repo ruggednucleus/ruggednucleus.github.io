@@ -63,6 +63,19 @@
             }
         });
 
+        canvas.addEventListener("touchstart", function(e) {
+            start_pos.x = (e.pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
+            start_pos.y = (e.pageY - canvas.offsetTop) / size | 0;
+        });
+
+        canvas.addEventListener("touchend", function(e) {
+            let x = (e.pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
+            let y = (e.pageY - canvas.offsetTop) / size | 0;
+            if(x !== start_pos.x || y !== start_pos.y) {
+                game.switch(start_pos.x, start_pos.y, x, y);
+            }
+        });
+
     </script>
 </body>
 </html>

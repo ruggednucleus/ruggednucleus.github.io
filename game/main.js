@@ -22,13 +22,12 @@ function Game(CTX, WIDTH, MAX_HEIGHT, START_HEIGHT, SIZE, SPRITES) {
         }
 
         if(animations.length) {
-            console.log(animations[0])
             let time = (performance.now() - animations[0].start) / animations[0].time;
             let cells = animations[0].cells;
 
             for(let i = 0; i < cells.length; i++) {
                 let cell = cells[i];
-                CTX.putImageData(b[cell.pos.x][cell.pos.y].frames[0], cell.fromX + (cell.toX - cell.fromX) * time, cell.fromY + (cell.toY - cell.fromY) * time);
+                CTX.putImageData(b[cell.pos.x][cell.pos.y].frames[cell.fromSprite + (cell.toSprite + 1 - cell.fromSprite) * time | 0], cell.fromX + (cell.toX - cell.fromX) * time, cell.fromY + (cell.toY - cell.fromY) * time);
             }
         }
     }
@@ -40,6 +39,14 @@ function Game(CTX, WIDTH, MAX_HEIGHT, START_HEIGHT, SIZE, SPRITES) {
                 let pos = animation.cells[i].pos;
                 board.animateing(pos.x, pos.y, false);
             }
+
+            switch(animation.type) {
+                case "switch":
+                    //to_remove = board.findBlocks();
+                    break;
+            }
+
+            
         }
 
         if(to_remove.length) {
@@ -60,7 +67,7 @@ function Game(CTX, WIDTH, MAX_HEIGHT, START_HEIGHT, SIZE, SPRITES) {
         let animation = {
             type: "switch",
             start: performance.now(),
-            time: 200,
+            time: 400,
             cells: [],
         };
 
@@ -76,8 +83,8 @@ function Game(CTX, WIDTH, MAX_HEIGHT, START_HEIGHT, SIZE, SPRITES) {
                 toX: to.x * size,
                 fromY: from.y * size,
                 toY: to.y * size,
-                fromSprite: 0,
-                toSprite: 0,
+                fromSprite: 1,
+                toSprite: 1,
             });
         }
 
@@ -212,13 +219,14 @@ function Board(WIDTH, HEIGHT, CELLS, MAX_NEIGHBORS) {
 
             return [
                 {
-                    from: {x: x1, y: y1},
-                    to: {x: x2, y: y2},
-                },
-                {
                     from: {x: x2, y: y2},
                     to: {x: x1, y: y1},
-                }];
+                },
+                {
+                    from: {x: x1, y: y1},
+                    to: {x: x2, y: y2},
+                }
+                ];
         },
 
         findBlocks: function() {
