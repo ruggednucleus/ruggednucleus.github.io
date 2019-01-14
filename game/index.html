@@ -6,14 +6,9 @@
     <script src="main.js"></script>
 </head>
 <body>
-    <p id="debug" style="font-size: 24px;"></p>
     <canvas id="canvas" style="position: absolute; left: 50%; transform: translate(-50%, 0%)"></canvas>
     <img src="puyo_scaled.png" id="img" style="display: none">
     <script>
-
-        let debug = document.getElementById("debug");
-        debug.innerText += "outerWidth = " + window.outerWidth + "px\n";
-        debug.innerText += "outerHeight = " + window.outerHeight + "px\n";
 
         let game;
         let size = 48;
