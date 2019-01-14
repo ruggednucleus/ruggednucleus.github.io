@@ -51,11 +51,13 @@
         };
 
         canvas.addEventListener("mousedown", function(e) {
+            console.log("mousedown", e);
             start_pos.x = (e.pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
             start_pos.y = (e.pageY - canvas.offsetTop) / size | 0;
         });
 
         canvas.addEventListener("mouseup", function(e) {
+            console.log("mouseup", e);
             let x = (e.pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
             let y = (e.pageY - canvas.offsetTop) / size | 0;
             if(x !== start_pos.x || y !== start_pos.y) {
@@ -64,11 +66,13 @@
         });
 
         canvas.addEventListener("touchstart", function(e) {
+            console.log("touchstart", e);
             start_pos.x = (e.pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
             start_pos.y = (e.pageY - canvas.offsetTop) / size | 0;
         });
 
         canvas.addEventListener("touchend", function(e) {
+            console.log("touchend", e);
             let x = (e.pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
             let y = (e.pageY - canvas.offsetTop) / size | 0;
             if(x !== start_pos.x || y !== start_pos.y) {
