@@ -1,54 +1,53 @@
-function Game(ctx, canvas_width, canvas_height, sprites) {
-    let width = 7;
-    let max_height = 10;
-    let start_height = 4;
+function Game(CTX, WIDTH, MAX_HEIGHT, START_HEIGHT, SIZE, SPRITES) {
+    let canvas_width = WIDTH * SIZE;
+    let canvas_height = MAX_HEIGHT * SIZE;
     let max_neighbors = 3;
 
-    let cell_width = canvas_width / width | 0;
-    let cell_height = canvas_height / max_height | 0;
-
-    let board = Board(width, start_height, sprites, max_neighbors);
+    let board = Board(WIDTH, START_HEIGHT, SPRITES, max_neighbors);
     let to_remove = [];
-
-    let held_cell = undefined;
-
-    function switch_cells(x) {
-        let result = board.switch(x);
-        if(result) {
-            to_remove = board.findBlocks();
-        }
-    }
-
-    function grab(x) {
-        held_cell = board.grab(x);
-    }
-
-    function place(x) {
-        board.place(x, held_cell);
-        held_cell = undefined;
-        to_remove = board.findBlocks();
-    }
+    let animations = [];
 
     function draw() {
-
-        ctx.clearRect(0, 0, canvas_width, canvas_height);
+        CTX.clearRect(0, 0, canvas_width, canvas_height);
 
         let b = board.getBoard();
         
         for(let x = 0; x < b.length; x++) {
             for(let y = 0; y < b[x].length; y++) {
                 let cell = b[x][y];
-                ctx.putImageData(cell.frames[0], x * cell_width, y * cell_height);
+                if(!cell.animateing) {
+                    CTX.putImageData(cell.frames[0], x * SIZE, y * SIZE);
+                }
+            }
+        }
+
+        if(animations.length) {
+            console.log(animations[0])
+            let time = (performance.now() - animations[0].start) / animations[0].time;
+            let cells = animations[0].cells;
+
+            for(let i = 0; i < cells.length; i++) {
+                let cell = cells[i];
+                CTX.putImageData(b[cell.pos.x][cell.pos.y].frames[0], cell.fromX + (cell.toX - cell.fromX) * time, cell.fromY + (cell.toY - cell.fromY) * time);
             }
         }
     }
 
-    let last_update = performance.now();
-
     function render() {
+        if(animations.length && performance.now() - animations[0].start >= animations[0].time) {
+            let animation = animations.shift();
+            for(let i = 0; i < animation.cells.length; i++) {
+                let pos = animation.cells[i].pos;
+                board.animateing(pos.x, pos.y, false);
+            }
+        }
+
         if(to_remove.length) {
             board.remove(to_remove);
             to_remove = board.findBlocks();
+            if(to_remove.length === 0) {
+                board.addLine();
+            }
         }
 
         draw();
@@ -57,45 +56,64 @@ function Game(ctx, canvas_width, canvas_height, sprites) {
 
     render();
 
+    function switchAnimation(cells) {
+        let animation = {
+            type: "switch",
+            start: performance.now(),
+            time: 200,
+            cells: [],
+        };
+
+        for(let i = 0; i < cells.length; i++) {
+            let from = cells[i].from;
+            let to = cells[i].to;
+
+            board.animateing(to.x, to.y, true);
+
+            animation.cells.push({
+                pos: {x: to.x, y: to.y},
+                fromX: from.x * size,
+                toX: to.x * size,
+                fromY: from.y * size,
+                toY: to.y * size,
+                fromSprite: 0,
+                toSprite: 0,
+            });
+        }
+
+        animations.push(animation);
+    }
+
     return {
-        board: board,
-
-        switch: switch_cells,
-
-        click: function(px, py) {
-            let x = px / cell_width | 0;
-            let y = py / cell_height | 0;
-
-            if(y < board.getBoard()[x].length - 1) {
-                switch_cells(x);
-            } else if(held_cell) {
-                place(x);
-            } else {
-                grab(x);
+        getBoard: function() {
+            return board;
+        },
+        
+        switch: function(x1, y1, x2, y2) {
+            let cells = board.switch(x1, y1, x2, y2);
+            if(cells.length) {
+                switchAnimation(cells);
             }
         },
-
-        get_held: function() {
-            return held_cell;
-        }
     }
 }
 
-function Board(width, height, cells, max_neighbors) {
+function Board(WIDTH, HEIGHT, CELLS, MAX_NEIGHBORS) {
     let board = [];
-    for(let x = 0; x < width; x++) {
+    for(let x = 0; x < WIDTH; x++) {
         board.push([]);
     }
 
-    for(let y = 0; y < height; y++) {
-        add_line(cells, max_neighbors);
+    for(let y = 0; y < HEIGHT; y++) {
+       
+        add_line();
     }
 
-    function add_line(cells, max_neighbors) {
-        for(let i = 0; i < width; i++) {
-            let cell = cells[Math.random() * cells.length | 0];
+    function add_line() {
+        for(let i = 0; i < WIDTH; i++) {
+            let cell = CELLS[Math.random() * CELLS.length | 0];
             board[i].unshift(Cell(cell));
-            if(find_neighbors(i, 0).length > max_neighbors) {
+            if(find_neighbors(i, 0).length > MAX_NEIGHBORS) {
                 board[i].shift();
                 i--;
             }
@@ -103,7 +121,7 @@ function Board(width, height, cells, max_neighbors) {
     }
 
     function at(x, y) {
-        if(x >= 0 && x < width && y >= 0 && y < board[x].length) {
+        if(x >= 0 && x < WIDTH && y >= 0 && y < board[x].length) {
             return board[x][y];
         }
 
@@ -157,7 +175,7 @@ function Board(width, height, cells, max_neighbors) {
             board[x][y] = undefined;
         }
 
-        for(let x = 0; x < width; x++) {
+        for(let x = 0; x < WIDTH; x++) {
             for(let y = 0; y < board[x].length; y++) {
                 if(board[x][y] === undefined) {
                     board[x].splice(y, 1);
@@ -183,43 +201,35 @@ function Board(width, height, cells, max_neighbors) {
             return height;
         },
 
-        switch: function(x) {
-            if(x < 0 || x > board.length) {
-                return false
+        switch: function(x1, y1, x2 ,y2) {
+            if(at(x1, y1) === undefined || at(x2, y2) === undefined) {
+                return [];
             }
 
-            let height = board[x].length;
-            if(height > 1) {
-                let temp = board[x][height - 1];
-                board[x][height - 1] = board[x][height - 2];
-                board[x][height - 2] = temp;
+            let temp = board[x1][y1];
+            board[x1][y1] = board[x2][y2];
+            board[x2][y2] = temp;
 
-                return true;
-            }
-
-            return false;
-        },
-
-        grab: function(x) {
-            if(board[x].length) {
-                return board[x].splice(board[x].length - 1)[0];
-            }
-            return undefined;
-        },
-
-        place: function(x, cell) {
-            board[x].push(cell);
+            return [
+                {
+                    from: {x: x1, y: y1},
+                    to: {x: x2, y: y2},
+                },
+                {
+                    from: {x: x2, y: y2},
+                    to: {x: x1, y: y1},
+                }];
         },
 
         findBlocks: function() {
             let checked_cells = {};
             let to_remove = [];
 
-            for(let x = 0; x < width; x++) {
+            for(let x = 0; x < WIDTH; x++) {
                 for(let y = 0; y < board[x].length; y++) {
                     if(!checked_cells[[x, y]]) {
                         let neighbors = find_neighbors(x, y);
-                        if(neighbors.length > max_neighbors) {
+                        if(neighbors.length > MAX_NEIGHBORS) {
                             to_remove = to_remove.concat(neighbors);
                         }
                         for(let i = 0; i < neighbors.length; i++) {
@@ -230,6 +240,12 @@ function Board(width, height, cells, max_neighbors) {
             }
 
             return to_remove;
+        },
+
+        animateing: function(x, y, bool) {
+            if(at(x, y)) {
+                board[x][y].animateing = bool; 
+            }
         },
 
         remove: remove,
@@ -243,5 +259,6 @@ function Cell(data) {
     return {
         color: color,
         frames: frames,
+        animateing: false,
     }
 }
