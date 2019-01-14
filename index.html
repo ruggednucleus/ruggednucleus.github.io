@@ -1,9 +1,85 @@
-<DOCTYPE html>
-  <html>
-    <head></head>
-    <body>
-      <a href="fire">Fire</a>
-      <br>
-      <a href="game">Game</a>
-    </body>
-  </html>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="main.js"></script>
+</head>
+<body>
+    <p id="debug" style="font-size: 24px;"></p>
+    <canvas id="canvas" style="position: absolute; left: 50%; transform: translate(-50%, 0%)"></canvas>
+    <img src="puyo_scaled.png" id="img" style="display: none">
+    <script>
+
+        let debug = document.getElementById("debug");
+        debug.innerText += "outerWidth = " + window.outerWidth + "px\n";
+        debug.innerText += "outerHeight = " + window.outerHeight + "px\n";
+
+        let game;
+        let size = 48;
+
+        let canvas = document.getElementById("canvas");
+        canvas.width = 7 * size;
+        canvas.height = 10 * size;
+
+        let ctx = canvas.getContext("2d");
+
+        let img = document.getElementById("img");
+
+        let sprites = [];
+
+
+        img.addEventListener("load", function() {
+            for(let y = 0; y < 5; y++) {
+                let sprite = {};
+                sprite.color = y;
+                sprite.frames = [];
+                for(let x = 0; x < 3; x++) {
+                    ctx.clearRect(0, 0, size, size);
+                    ctx.drawImage(img, x * 64, y * 64, 64, 64, 0, 0, size, size);
+                    sprite.frames.push(ctx.getImageData(0, 0, size, size));
+                }
+                sprites.push(sprite);
+            }
+
+            game = Game(ctx, 7, 10, 4, size, sprites);
+        });
+        
+        let start_pos = {
+            x: 0,
+            y: 0,
+        };
+
+        canvas.addEventListener("mousedown", function(e) {
+            console.log("mousedown", e);
+            start_pos.x = (e.pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
+            start_pos.y = (e.pageY - canvas.offsetTop) / size | 0;
+        });
+
+        canvas.addEventListener("mouseup", function(e) {
+            console.log("mouseup", e);
+            let x = (e.pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
+            let y = (e.pageY - canvas.offsetTop) / size | 0;
+            if(x !== start_pos.x || y !== start_pos.y) {
+                game.switch(start_pos.x, start_pos.y, x, y);
+            }
+        });
+
+        canvas.addEventListener("touchstart", function(e) {
+            console.log("touchstart", e);
+            start_pos.x = (e.targetTouches[0].pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
+            start_pos.y = (e.targetTouches[0].pageY - canvas.offsetTop) / size | 0;
+        });
+
+        canvas.addEventListener("touchend", function(e) {
+            console.log("touchend", e);
+            let x = (e.targetTouches[0].pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
+            let y = (e.targetTouches[0].pageY - canvas.offsetTop) / size | 0;
+            if(x !== start_pos.x || y !== start_pos.y) {
+                game.switch(start_pos.x, start_pos.y, x, y);
+            }
+        });
+
+    </script>
+</body>
+</html>
