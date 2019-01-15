@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="main.js"></script>
+</head>
+<body>
+    <canvas id="canvas" style="position: absolute; top: 0; left: 50%; transform: translate(-50%, 0)"></canvas>
+    <img src="puyo.png" id="img" style="display: none">
+    <script>
+    
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        let width = 8;
+        let height = 8;
+        let size = 32;
+
+        canvas.width = width * size;
+        canvas.height = height * size;
+
+        let game;
+        let img = document.getElementById("img");
+        let sprites = [];
+
+        img.addEventListener("load", function() {
+            for(let y = 0; y < 5; y++) {
+                let sprite = {};
+                sprite.image = img;
+                sprite.size = 32;
+                sprite.frames = 10;
+                sprite.color = y;
+                sprite.frames = [];
+                sprites.push(sprite);
+            }
+
+            game = Game(ctx, width, height, size, sprites);
+        });
+
+        let start_pos = {
+            x: 0,
+            y: 0,
+        };
+
+        canvas.addEventListener("mousedown", function(e) {
+            start_pos.x = (e.pageX - (canvas.offsetLeft - canvas.width / 2));
+            start_pos.y = (e.pageY - canvas.offsetTop);
+        });
+
+        canvas.addEventListener("mouseup", function(e) {
+            let x = (e.pageX - (canvas.offsetLeft - canvas.width / 2));
+            let y = (e.pageY - canvas.offsetTop);
+
+            let sx = start_pos.x / size | 0;
+            let sy = start_pos.y / size | 0;
+
+            if(Math.abs(start_pos.x - x) > Math.abs(start_pos.y - y)) {
+                if(start_pos.x > x) {
+                    game.switch(sx, sy, sx - 1, sy);
+                } else {
+                    game.switch(sx, sy, sx + 1, sy);
+                }
+            } else {
+                if(start_pos.y > y) {
+                    game.switch(sx, sy, sx, sy - 1);
+                } else {
+                    game.switch(sx, sy, sx, sy + 1);
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
