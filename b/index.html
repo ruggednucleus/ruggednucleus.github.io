@@ -71,16 +71,29 @@
         });
 
         canvas.addEventListener("touchstart", function(e) {
-            start_pos.x = (e.changedTouches[0].pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
-            start_pos.y = (e.changedTouches[0].pageY - (canvas.offsetTop - canvas.height / 2)) / size | 0;
+            start_pos.x = (e.changedTouches[0].pageX - (canvas.offsetLeft - canvas.width / 2));
+            start_pos.y = (e.changedTouches[0].pageY - (canvas.offsetTop - canvas.height / 2));
             e.preventDefault();
         });
 
         canvas.addEventListener("touchend", function(e) {
-            let x = (e.changedTouches[0].pageX - (canvas.offsetLeft - canvas.width / 2)) / size | 0;
-            let y = (e.changedTouches[0].pageY - (canvas.offsetTop - canvas.height / 2)) / size | 0;
-            if(x !== start_pos.x || y !== start_pos.y) {
-                game.switch(start_pos.x, start_pos.y, x, y);
+            let x = (e.changedTouches[0].pageX - (canvas.offsetLeft - canvas.width / 2));
+            let y = (e.changedTouches[0].pageY - (canvas.offsetTop - canvas.height / 2));
+            let sx = start_pos.x / size | 0;
+            let sy = start_pos.y / size | 0;
+
+            if(Math.abs(start_pos.x - x) > Math.abs(start_pos.y - y)) {
+                if(start_pos.x > x) {
+                    game.switch(sx, sy, sx - 1, sy);
+                } else {
+                    game.switch(sx, sy, sx + 1, sy);
+                }
+            } else {
+                if(start_pos.y > y) {
+                    game.switch(sx, sy, sx, sy - 1);
+                } else {
+                    game.switch(sx, sy, sx, sy + 1);
+                }
             }
             e.preventDefault();
         });
