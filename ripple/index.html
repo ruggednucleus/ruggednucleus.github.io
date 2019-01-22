@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+    
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        let width = 400;
+        let height = 400;
+
+        let halfWidth = width >> 1;
+        let halfHeight = height >> 1;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        let texture, ripple;
+        let lastMap = [], rippleMap = [];
+        let prevIndex, currentIndex;
+
+        ctx.fillStyle = '#008888';
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = '#00ff77';
+
+        ctx.save();
+        ctx.rotate(-0.25);
+
+        let size = 25;
+
+        for(let i = 0; i < height / size; i++) {
+            ctx.fillRect(-width, i * 50, width * 3, size);
+        }
+
+        ctx.restore();
+
+        function init() {
+
+            texture = ctx.getImageData(0, 0, width, height);
+            ripple = ctx.getImageData(0, 0, width, height);
+            
+            prevIndex = 0;
+            currentIndex = width * height;
+
+            for(let i = 0; i < width * height * 2; i++) {
+                lastMap[i] = 0;
+                rippleMap[i] = 0;
+            }
+
+            render();
+        }
+
+        function dropAt(x, y) {
+            for(let i = x - 3; i < x + 3; i++) {
+                for(let j = y - 3; j < y + 3; j++) {
+                    rippleMap[i + j * width + prevIndex] += 256;
+                }
+            }
+            
+        }
+
+        function at(x, y, index) {
+            let i = x + (y * width) + index;
+            if(i < index || i >= (width * height) + index) {
+                return 0;
+            } else {
+                return rippleMap[i];
+            }
+        }
+
+        function newFrame() {
+            let temp = prevIndex;
+            prevIndex = currentIndex;
+            currentIndex = temp;
+
+            for(let x = 0; x < width; x++) {
+                for(let y = 0; y < height; y++) {
+                    let data = (at(x - 1, y, prevIndex) +
+                                at(x + 1, y, prevIndex) +
+                                at(x, y - 1, prevIndex) +
+                                at(x, y + 1, prevIndex)) >> 1;
+
+                    let i = x + y * width + currentIndex;
+                    data -= rippleMap[i];
+                    data -= data >> 5;
+
+                    rippleMap[i] = data;
+                    data = 1024 - data;
+
+                    if(data !== lastMap[i]) {
+                        let a = (((x - halfWidth) * data / 1024) << 0) + halfWidth;
+                        let b = (((y - halfHeight) * data / 1024) << 0) + halfHeight;
+
+                        if(a >= width) {a = width - 1}
+                        if(a < 0) {a = 0}
+                        if(b >= height) {b = height - 1}
+                        if(b < 0) {b = 0}
+
+                        let pixel = (a + b * width) * 4;
+
+                        ripple.data[i * 4] = texture.data[pixel];
+                        ripple.data[i * 4 + 1] = texture.data[pixel + 1];
+                        ripple.data[i * 4 + 2] = texture.data[pixel + 2];
+                    }
+                    
+                    lastMap[i] = data;
+                }
+            }
+        }
+
+        function render() {
+            newFrame();
+            ctx.putImageData(ripple, 0, 0);
+            requestAnimationFrame(render);
+
+            if(Math.random() > 0.9) {dropAt(Math.random() * width | 0, Math.random() * height | 0)};
+        }
+
+        init();
+
+        canvas.addEventListener("mousemove", function(e) {
+            dropAt(e.offsetX, e.offsetY);
+        }) ;
+
+    </script>
+</body>
+</html>
