@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="Link.js"></script>
+    <script src="ParticleSystem.js"></script>
+    <script src="PointMass.js"></script>
+    <script src="body.js"></script>
+    <script src="Circle.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+    
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        let width = 512;
+        let height = 512;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        let mouse = {
+            x: 0,
+            y: 0,
+
+            px: 0,
+            py: 0,
+
+            down: false,
+            left: false,
+            influenceSize: 10 * 10,
+            tearSize: 4 * 4,
+            influenceScalar: 5,
+        }
+
+        let pointmasses = [];
+        let circles = [];
+
+        let gravity = 900;
+
+        let curtainHeight = 40;
+        let curtainWidth = 60;
+        let restingDistance = 6;
+        let stiffness = 1;
+        let tearSensitivity = 100;
+
+        function addPointMass(point) {
+            pointmasses.push(point);
+        }
+
+        function addCircle(circle) {
+            circles.push(circle);
+        }
+
+        function reset() {
+            pointmasses = [];
+            circles = [];
+            createCurtain();
+        }
+
+        function createCurtain() {
+
+            let midWidth = (width / 2 - (curtainWidth * restingDistance) / 2);
+            for(let y = 0; y < curtainHeight; y++) {
+                for(let x = 0; x < curtainWidth; x++) {
+                    let point = new PointMass(midWidth + x * restingDistance, y * restingDistance + 50);
+
+                    if(x !== 0) {
+                        point.attachTo(pointmasses[pointmasses.length - 1], restingDistance, stiffness, tearSensitivity, true);
+                    }
+
+                    if(y !== 0) {
+                        point.attachTo(pointmasses[(y - 1) * curtainWidth + x], restingDistance, stiffness, tearSensitivity, true);
+                    }
+
+                    if(y === 0) {
+                        point.pinTo(point.x, point.y);
+                    }
+
+                    pointmasses.push(point);
+                }
+            }
+        }
+
+        createCurtain();
+
+        let ps = new ParticleSystem(width, height);
+
+        let dt = performance.now();
+
+        function render() {
+            ps.update(pointmasses, circles, gravity, mouse);
+            canvas.width = width;
+
+            ctx.beginPath();
+            for(let i = 0; i < circles.length; i++) {
+                circles[i].draw(ctx);
+            }
+
+            for(let i = 0; i < pointmasses.length; i++) {
+                pointmasses[i].draw(ctx);
+            }
+            ctx.stroke();
+
+            ctx.fillText(performance.now() - dt, 10, 10);
+            dt = performance.now();
+
+            requestAnimationFrame(render);
+        }
+
+        requestAnimationFrame(render);
+
+        canvas.addEventListener("mousedown", function() {
+            mouse.px = mouse.x;
+            mouse.py = mouse.y;
+            mouse.down = true;
+            mouse.left = true;
+        });
+
+        canvas.addEventListener("contextmenu", function(e) {
+            e.preventDefault();
+            mouse.down = true;
+            mouse.left = false;
+        });
+
+        canvas.addEventListener("mousemove", function(e) {
+            mouse.px = mouse.x;
+            mouse.py = mouse.y;
+            mouse.x = e.offsetX;
+            mouse.y = e.offsetY;
+        });
+
+        document.addEventListener("mouseup", function() {
+            mouse.down = false;
+            mouse.left = true;
+        });
+
+        document.addEventListener("keydown", function(e) {
+            switch(e.keyCode) {
+                case 82:
+                    reset();
+                    break;
+                case 66:
+                    createBody(Math.random() * width, 50, Math.random() * 50 + 50, addPointMass, addCircle);
+                    break;
+                case 71:
+                    gravity = gravity > 0 ? 0 : 900;
+                    break;
+
+            }
+        });
+
+    </script>
+</body>
+</html>
