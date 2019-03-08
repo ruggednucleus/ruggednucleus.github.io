@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GIF</title>
+    <script src="gif-decoder.js"></script>
+    <script src="lzw-compressor.js"></script>
+    <script src="lzw-decompressor.js"></script>
+</head>
+<body>
+    
+    <input type="file" id="file-input">
+
+    <br>
+
+    <img id="img">
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+    
+        let img = document.getElementById("img");
+
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        let data;
+        let decoded;
+
+        let fileInput = document.getElementById("file-input");
+        fileInput.addEventListener("change", function() {
+            let file = fileInput.files[0];
+            let blob = file.slice(0, file.size);
+            img.src = URL.createObjectURL(blob)
+            let reader = new FileReader();
+            reader.addEventListener("loadend", function() {
+                data = new Uint8Array(reader.result);
+                decoded = Decoder(data);
+                console.log(data);
+                console.log(decoded);
+
+                draw(decoded.imageDescriptors[0], decoded.globalColorTable);
+            });
+            reader.readAsArrayBuffer(blob);
+        });
+
+        
+        function drawGIF(gif) {
+            let width = 0;
+            let height = 0;
+
+            for(let i = 0; i < gif.imageDescriptors.length; i++) {
+                width += gif.imageDescriptors[i].imageWidth;
+                height = Math.max(gif.imageDescriptors[i].imageHeight, height);
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            let offset = 0;
+
+            for(let i = 0; i < gif.imageDescriptors.length; i++) {
+                let imageData = ctx.createImageData(gif.imageDescriptors[i].imageWidth, gif.imageDescriptors[i].imageHeight);
+                let data = Decompressor(gif.imageDescriptors[i].tableBasedImageData.imageData, gif.imageDescriptors[i].tableBasedImageData.LZWMinimumCodeSize);
+                let color_table = gif.imageDescriptors[i].localColorTable || gif.globalColorTable;
+
+                for(let j = 0; j < data.length; j++) {
+                    imageData.data[j * 4 + 0] = color_table[data[j] * 3 + 0];
+                    imageData.data[j * 4 + 1] = color_table[data[j] * 3 + 1];
+                    imageData.data[j * 4 + 2] = color_table[data[j] * 3 + 2];
+                    imageData.data[j * 4 + 3] = 255;
+
+                    if(gif.imageDescriptors[i].graphicControlExtension.transparentColorIndex === data[j]) {
+                        imageData.data[j * 4 + 3] = 0;
+                    }
+                }
+
+                ctx.putImageData(imageData, offset, 0);
+                offset += gif.imageDescriptors[i].imageWidth;
+            }
+        }
+
+        function draw(image_descriptor, global_color_table) {
+            let width = image_descriptor.imageWidth;
+            let height = image_descriptor.imageHeight;
+
+            let data = Decompressor(image_descriptor.tableBasedImageData.imageData, image_descriptor.tableBasedImageData.LZWMinimumCodeSize);
+//console.log(data);
+            canvas.width = width;
+            canvas.height = height;
+            
+            let ctx = canvas.getContext("2d");
+
+            let imageData = ctx.createImageData(width, height);
+
+            for(let i = 0; i < data.length; i++) {
+                imageData.data[i * 4 + 0] = global_color_table[data[i] * 3 + 0];
+                imageData.data[i * 4 + 1] = global_color_table[data[i] * 3 + 1];
+                imageData.data[i * 4 + 2] = global_color_table[data[i] * 3 + 2];
+                imageData.data[i * 4 + 3] = 255;
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function compressor(data) {
+            let table = {};
+            for(let i = 0; i < 256; i++) {
+                table[String.fromCharCode(i)] = i;
+            }
+
+            let next = 256 + 1;
+            let string = String.fromCharCode(data[0]);
+            let char;
+            let output = [];
+
+            for(let i = 1; i < data.length; i++) {
+                let char = String.fromCharCode(data[i]);
+                if(table[string + char] !== undefined) {
+                    string += char;
+                } else {
+                    output.push(table[string]);
+                    table[string + char] = next++;
+                    string = char;
+                }
+            }
+
+            output.push(table[string]);
+
+            console.log(table);
+            return output;
+        }
+
+        function decompressor(data) {
+            let table = {};
+            for(let i = 0; i < 256; i++) {
+                table[i] = String.fromCharCode(i);
+            }
+
+            let next = 256 + 1;
+            let output = [];
+            let old_code = data[0];
+            let new_code;
+            let string;
+            let char;
+
+            output.push(table[old_code]);
+
+            for(let i = 1; i < data.length; i++) {
+                new_code = data[i];
+                if(table[new_code] !== undefined) {
+                    string = table[new_code];
+                } else {
+                    string = table[old_code];
+                    string += char;
+                }
+
+                output.push(string);
+                char = string[0];
+                table[next++] = table[old_code] + char;
+                old_code = new_code;
+            }
+
+            console.log(table);
+            return output;
+        }
+
+        function binary(data) {
+            let b = [];
+            for(let i = 0; i < data.length; i++) {
+                b[i] = data[i].toString(2);
+                while(b[i].length < 8) {
+                    b[i] = "0" + b[i];
+                }
+            }
+
+            return b;
+        }
+
+        function decode(data, size) {
+            let out = [];
+
+            let offset = 0;
+            let index = 0;
+            while(index < data.length) {
+                let byte0 = data[index] >> offset & 2 ** size - 1;
+                let byte1 = data[index + 1] | 0;
+
+                if(offset + size > 8) {
+                    let overflow = offset + size - 8;
+                    byte1 = byte1 & 2 ** overflow - 1;
+                    byte0 = (byte1 << (size - overflow)) | byte0;
+                }
+
+                offset += size;
+
+                if(offset >= 8) {
+                    offset -= 8;
+                    index++;
+                }
+
+                out.push(byte0);
+            }
+
+            return out;
+        }
+
+    </script>
+
+</body>
+</html>
