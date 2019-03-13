@@ -44,8 +44,11 @@ function Decoder(DATA) {
                         break;
 
                     case 0xFF:
+                        if(!GIF.applicationExtensions) {
+                            GIF.applicationExtensions = [];
+                        }
                         result = ApplicationExtension(index);
-                        GIF.applicationExtension = result.applicationExtension;
+                        GIF.applicationExtensions.push(result.applicationExtension);
                         index = result.index;
                         break;
                     
@@ -285,10 +288,7 @@ function Decoder(DATA) {
         delay_time = (DATA[index + 1] << 8) | DATA[index];
         index += 2;
 
-        if(transparent_color_flag) {
-            transparent_color_index = DATA[index];
-        }
-
+        transparent_color_index = DATA[index];
         index += 2;
 
         let graphicControlExtension = {
@@ -296,12 +296,9 @@ function Decoder(DATA) {
             userInputFlag: user_input_flag,
             transparentColorFlag: transparent_color_flag,
             delayTime: delay_time,
+            transparentColorIndex: transparent_color_index,
         }
-
-        if(transparent_color_flag) {
-            graphicControlExtension.transparentColorIndex = transparent_color_index;
-        }
-
+        
         return {
             graphicControlExtension: graphicControlExtension,
             index: index,
