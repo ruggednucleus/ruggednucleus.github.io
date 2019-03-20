@@ -119,7 +119,9 @@ function tracer(o, d, n) {
     return {m: m, n: n, t: t};
 }
 
-function line(y, imageData, a, b, c) {
+function line(y, a, b, c) {
+    let data = [];
+
     for(let x = 0; x < 512; x++) {
 
         let p = Vector(13, 13, 13);
@@ -137,34 +139,23 @@ function line(y, imageData, a, b, c) {
             p = sampler(Vector(17, 16, 8).add(t), dir).scale(3.5).add(p);
         }
 
-        let py = 511 - y;
-        let px = 511 - x;
-
-        imageData.data[(py * 512 + px) * 4] = p.x() << 0;
-        imageData.data[(py * 512 + px) * 4 + 1] = p.y() << 0;
-        imageData.data[(py * 512 + px) * 4 + 2] = p.z() << 0;
-        imageData.data[(py * 512 + px) * 4 + 3] = 255;
+        data[x * 4] = p.x() << 0;
+        data[x * 4 + 1] = p.y() << 0;
+        data[x * 4 + 2] = p.z() << 0;
+        data[x * 4 + 3] = 255;
     }
+
+    return data;
 }
 
-function main(ctx) {
-    let imageData = ctx.createImageData(512, 512);
-
+onmessage = function() {
     let g = Vector(-6, -16, 0).normalise();
     let a = Vector(0,0,1).cross(g).normalise().scale(0.002);
     let b = g.cross(a).normalise().scale(0.002);
     let c = a.add(b).scale(-256).add(g);
 
-    let y = 0;
-
-    let interval = setInterval(function() {
-        let dt = performance.now();
-        line(y, imageData, a, b, c);
-        ctx.putImageData(imageData, 0, 0);
-        if(++y >= 512) {
-            clearInterval(interval);
-            console.log(imageData);
-        }
-        console.log(y, performance.now() - dt);
-    }, 1000);
+    for(let y = 0; y < 512; y++) {
+        let data = line(y, a, b, c);
+        postMessage([511 - y, data, y === 511]);
+    }
 }
