@@ -21,7 +21,7 @@
     <script>
 	    
         let canvas = document.getElementById("canvas");
-        let shapeshifter
+        let shapeshifter, lt;
 
         function time() {
             let t = new Date();
@@ -54,7 +54,7 @@
             canvas.height = window.outerHeight;
             shapeshifter.resize();
             shapeshifter.clearQueues();
-            shapeshifter.write("123");
+            shapeshifter.write(lt);
 		});
 
         window.addEventListener("load", function() {
@@ -66,14 +66,14 @@
 
             if(t) {
                 let i = 0;
-                let last = t.text[i];
+                lt = t.text[i];
                 shapeshifter.write(t.text[i]);
                 setInterval(function() {
                     if(++i >= t.text.length) {
                         i = 0;
                     }
-                    if(last !== t.text[i]) {
-                        last = t.text[i];
+                    if(lt !== t.text[i]) {
+                        lt = t.text[i];
                         shapeshifter.write(t.text[i]);
                     }
                 }, parseInt(t.time) || 5000);
