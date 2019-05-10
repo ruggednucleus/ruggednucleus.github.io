@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#cbebdb" />
+    <link rel="manifest" href="/manifest.json">
+    <script src="main.js"></script>
+    <style>
+        canvas {
+            background: linear-gradient(to bottom, rgb(203, 235, 219) 0%, rgb(55, 148, 192) 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="800"></canvas>
+    <script>
+	    
+        let canvas = document.getElementById("canvas");
+        let shapeshifter
+
+        function time() {
+            let t = new Date();
+            let h = (t.getHours() < 10 ? "0" : "") + t.getHours();
+            let m = (t.getMinutes() < 10 ? "0" : "") + t.getMinutes();
+
+            return h + ":" + m;
+        }
+
+        function text() {
+            if(location.search.search("text") === -1) {
+                return false;
+            }
+
+            let t = location.search.replace("?", "").split("&");
+            let m = {}
+
+            for(let i = 0; i < t.length; i++) {
+                t[i] = t[i].split("=");
+                if(t[i][0] === "text") {
+                    t[i][1] = decodeURI(t[i][1]).replace(/\\n/g, "\n").split(",");
+                }
+                m[t[i][0]] = t[i][1];
+            }
+            return m;
+        }
+
+		window.addEventListener("resize", function() {
+			canvas.width = window.outerWidth;
+            canvas.height = window.outerHeight;
+            shapeshifter.resize();
+		});
+
+        window.addEventListener("load", function() {
+            canvas.width = window.outerWidth;
+            canvas.height = window.outerHeight;
+            shapeshifter = Shapeshifter(canvas.getContext("2d"));
+
+            let t = text();
+
+            if(t) {
+                let i = 0;
+                let last = t.text[i];
+                shapeshifter.write(t.text[i]);
+                setInterval(function() {
+                    if(++i >= t.text.length) {
+                        i = 0;
+                    }
+                    if(last !== t.text[i]) {
+                        last = t.text[i];
+                        shapeshifter.write(t.text[i]);
+                    }
+                }, parseInt(t.time) || 5000);
+            } else {
+                lt = time();
+                shapeshifter.write(lt);
+                setInterval(function() {
+                    if(lt !== time()) {
+                        lt = time();
+                        shapeshifter.write(lt);
+                    }
+                }, 1000);
+            }
+        });
+
+        
+    </script>
+</body>
+</html>
