@@ -66,6 +66,16 @@ function Shapeshifter(output_ctx) {
             console.log(activePoints)
         },
         
+        clearQueues: function() {
+            for(let i = 0; i < activePoints.length; i++) {
+                activePoints[i].clearQueue();
+            }
+
+            for(let i = 0; i < passivePoints.length; i++) {
+                //passivePoints[i].clearQueue();
+            }
+        },
+
         resize: function() {
 	        width = output_ctx.canvas.width;
 			height = output_ctx.canvas.height;
@@ -176,6 +186,12 @@ function ShapeshifterPoint(point, style) {
                     time: 1000,
                     start: q.length ? 0 : performance.now(),
                 });
+            }
+        },
+
+        clearQueue: function() {
+            for(let i = 1; i < q.length; ) {
+                q.splice(i, 1);
             }
         },
 

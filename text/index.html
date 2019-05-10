@@ -5,7 +5,7 @@
     <title>Page Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#cbebdb" />
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="https://ruggednucleus.github.io/text/manifest.json">
     <script src="main.js"></script>
     <style>
         canvas {
@@ -53,6 +53,8 @@
 			canvas.width = window.outerWidth;
             canvas.height = window.outerHeight;
             shapeshifter.resize();
+            shapeshifter.clearQueues();
+            shapeshifter.write("123");
 		});
 
         window.addEventListener("load", function() {
