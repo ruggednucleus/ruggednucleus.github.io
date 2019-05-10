@@ -1,0 +1,15 @@
+{
+    "short_name": "App",
+    "name": "Application",
+    "icons": [
+      {
+        "src": "icon128x128.png",
+        "sizes": "128x128",
+        "type": "image/png"
+      }
+    ],
+    "start_url": "index.html",
+    "display": "standalone",
+    "orientation": "landscape"
+  }
+  
