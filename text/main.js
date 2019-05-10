@@ -70,10 +70,6 @@ function Shapeshifter(output_ctx) {
             for(let i = 0; i < activePoints.length; i++) {
                 activePoints[i].clearQueue();
             }
-
-            for(let i = 0; i < passivePoints.length; i++) {
-                //passivePoints[i].clearQueue();
-            }
         },
 
         resize: function() {
@@ -131,10 +127,14 @@ function ShapeshifterPoint(point, style) {
         ctx.beginPath();
         if(q.length) {
             let t = (performance.now() - q[0].start) / q[0].time;
+            let r = radius * (z + (q[0].z - z) * t);
+            if(r < 0) {
+                r = q[0].z;
+            }
             ctx.arc(
                 pos.x + (q[0].pos.x - pos.x) * t,
                 pos.y + (q[0].pos.y - pos.y) * t,
-                radius * (z + (q[0].z - z) * t),
+                r,
                 0, Math.PI * 2);
         } else {
             ctx.arc(pos.x, pos.y, radius * z, 0, Math.PI * 2);
