@@ -22,6 +22,7 @@
 	    
         let canvas = document.getElementById("canvas");
         let shapeshifter, lt;
+        let can_resize = false;
 
         function time() {
             let t = new Date();
@@ -50,17 +51,23 @@
         }
 
 		window.addEventListener("resize", function() {
-			canvas.width = window.outerWidth;
-            canvas.height = window.outerHeight;
-            shapeshifter.resize();
-            shapeshifter.clearQueues();
-            shapeshifter.write(lt);
+            if(can_resize) {
+                canvas.width = window.outerWidth;
+                canvas.height = window.outerHeight;
+                shapeshifter.resize();
+                shapeshifter.clearQueues();
+                shapeshifter.write(lt);
+            }
 		});
 
         window.addEventListener("load", function() {
             canvas.width = window.outerWidth;
             canvas.height = window.outerHeight;
             shapeshifter = Shapeshifter(canvas.getContext("2d"));
+
+            setTimeout(function() {
+                can_resize = true;
+            }, 1000)
 
             let t = text();
 
