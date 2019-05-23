@@ -6,18 +6,20 @@
 </head>
 <body>
     
-    <img src="Pac-man.png" id="pac-man-img">
+    <img src="maze.png" id="pac-man-img">
+    <img src="maze-empty.png" id="maze">
     <canvas id="canvas"></canvas>
 
     <script>
     
-        let image, canvas, width, height, ctx, board;
+        let image, maze_image, canvas, width, height, ctx, board;
         let size = 8;
 
         window.addEventListener("load", function() {
-            let image = document.getElementById("pac-man-img");
-            let canvas = document.getElementById("canvas");
-            let ctx = canvas.getContext("2d");
+            image = document.getElementById("pac-man-img");
+            maze_image = document.getElementById("maze");
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext("2d");
 
             width = image.width;
             height = image.height;
@@ -28,34 +30,37 @@
             ctx.drawImage(image, 0, 0);
             let imageData = ctx.getImageData(0, 0, width, height);
 
-            board = Array(width * height / size);
+            
+            let maze_width = width / size;
+            let maze_height = height / size;
+            board = Array(maze_width * maze_height);
 
             for(let x = 0; x < width; x += size) {
                 for(let y = 0; y < height; y += size) {
                     if(imageData.data[(y * width + x + 3) * 4] === 255) {
-                        board[y / size * width + x / size] = "Power pellet";
+                        board[y / size * maze_width + x / size] = "Power pellet";
                     } else if(imageData.data[((y + 4) * width + x + 4) * 4] === 255) {
-                        board[y / size * width + x / size] = "Pellet";
+                        board[y / size * maze_width + x / size] = "Pellet";
                     } else {
                         for(let i = 0; i < size; i++) {
                             if(imageData.data[((y + i) * width + x) * 4] === 33 || imageData.data[(y * width + x + i) * 4] === 33 || imageData.data[((y + i) * width + x + size - 1) * 4] === 33 || imageData.data[((y + size - 1) * width + x + i) * 4] === 33) {
-                                board[y / size * width + x / size] = "Wall";
+                                board[y / size * maze_width + x / size] = "Wall";
                                 break;
                             }
                         }
                     }
                     
-                    if(board[y / size * width + x / size] === undefined) {
-                        board[y / size * width + x / size] = "Empty";
+                    if(board[y / size * maze_width + x / size] === undefined) {
+                        board[y / size * maze_width + x / size] = "Empty";
                     }
                 }
             }
 
-            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(maze_image, 0, 0);
 
-            for(let y = 0; y < height / size; y++) {
-                for(let x = 0; x < width / size; x++) {
-                    switch(board[y * width + x]) {
+            for(let y = 0; y < maze_height; y++) {
+                for(let x = 0; x < maze_width; x++) {
+                    switch(board[y * maze_width + x]) {
                         case "Empty":
                             ctx.fillStyle = "black";
                             ctx.fillRect(x * size, y * size, size, size);
@@ -74,7 +79,7 @@
                             break;
                         case "Wall":
                             ctx.fillStyle = "#2121DE";
-                            ctx.fillRect(x * size, y * size, size, size);
+                            //ctx.fillRect(x * size, y * size, size, size);
                             break;
                     }
                 }
