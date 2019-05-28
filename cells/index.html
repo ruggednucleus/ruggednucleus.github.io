@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poisson-disc</title>
+    <script src="poisson-disc.js"></script>
+    <script src="rhill-voronoi-core.min.js"></script>
+    <style>
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+    
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        let width = window.outerWidth;
+        let height = window.outerHeight;
+        let radius = 20;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        let points = PoissonDisc(width, height, radius, 10);
+        for(let i = 0; i < points.length; i++) {
+            let point = points[i];
+            point.cx = point.x;
+            point.cy = point.y;
+            point.distace = radius / 2.5 * Math.random();
+            point.rotation = Math.random() * 360 | 0;
+        }
+
+        let voronoi = new Voronoi();
+        let box = {xl: -10, xr: width + 10, yt: -10, yb: height + 10}
+
+        function render() {            
+            ctx.clearRect(0, 0, width, height);
+
+            for(let i = 0; i < points.length; i++) {
+                let point = points[i];
+                point.rotation++;
+                point.x = point.cx + point.distace * Math.cos(point.rotation * Math.PI / 180);
+                point.y = point.cy + point.distace * Math.sin(point.rotation * Math.PI / 180);
+/*
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            */            }
+
+            let diagram = voronoi.compute(points, box);
+
+            ctx.beginPath();
+            for(let i = 0; i < diagram.edges.length; i++) {
+                let edge = diagram.edges[i];
+
+                ctx.moveTo(edge.va.x, edge.va.y);
+                ctx.lineTo(edge.vb.x, edge.vb.y);
+            }
+            ctx.stroke();
+
+            requestAnimationFrame(render);
+        }
+
+        render();
+
+    </script>
+</body>
+</html>
