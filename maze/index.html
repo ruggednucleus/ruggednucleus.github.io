@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze</title>
+    <script src="maze.js"></script>
+</head>
+<body>
+    
+    <input id="width" type="number" min="2" max="100" value="10"> Width
+    <br>
+    <input id="height" type="number" min="2" max="100" value="10"> Height
+    <br>
+    <input id="path" type="number" step="0.1" min="0" max="1" value="0.2"> New path
+    <br>
+    <input id="size" type="number" min="1" max="100" value="10"> Size
+    <br>
+    <button id="button">Maze</button>
+    <br>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+    
+        let input_width = document.getElementById("width");
+        let input_height = document.getElementById("height");
+        let input_path = document.getElementById("path");
+        let input_size = document.getElementById("size");
+        let button = document.getElementById("button");
+
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        let maze = new Maze(10, 10, 0.2);
+        Maze.Render(maze, ctx, 10);
+
+        button.addEventListener("click", function() {
+            maze = new Maze(parseInt(input_width.value), parseInt(input_height.value), parseFloat(input_path.value));
+            Maze.Render(maze, ctx, parseInt(input_size.value))
+        });
+
+    </script>
+
+</body>
+</html>
