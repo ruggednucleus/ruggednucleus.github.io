@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="../vector/vector.js"></script>
+    <script src="boid.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+    
+    <canvas id="canvas"></canvas>
+
+    <table>
+
+        <tr>
+            <th></th>
+            <th>Radius</th>
+            <th>Force</th>
+            <th>Weight</th>
+            <th>Show Radius</th>
+        </tr>
+
+        <tr>
+            <td>Alignment</td>
+            <td><input id="alignmentRadius" type="range" min="0" max="100" value="50"></td>
+            <td><input id="alignmentForce" type="range" min="0" max="1" value="0.5" step="0.1"></td>
+            <td><input id="alignmentWeight" type="range" min="0" max="2" value="1" step="0.1"></td>
+            <td><input id="alignmentShow" type="checkbox"></td>
+        </tr>
+
+        <tr>
+            <td>Cohesion</td>
+            <td><input id="cohesionRadius" type="range" min="0" max="100" value="50"></td>
+            <td><input id="cohesionForce" type="range" min="0" max="1" value="0.1" step="0.1"></td>
+            <td><input id="cohesionWeight" type="range" min="0" max="2" value="1" step="0.1"></td>
+            <td><input id="cohesionShow" type="checkbox"></td>
+        </tr>
+
+        <tr>
+            <td>Separation</td>
+            <td><input id="separationRadius" type="range" min="0" max="100" value="25"></td>
+            <td><input id="separationForce" type="range" min="0" max="1" value="0.1" step="0.1"></td>
+            <td><input id="separationWeight" type="range" min="0" max="2" value="1.5" step="0.1"></td>
+            <td><input id="separationShow" type="checkbox"></td>
+        </tr>
+
+        <tr>
+            <td>Boids</td>
+            <td><input id="boids" style="width: 125px; text-align: right" type="number" value="100" min="0"></td>
+        </tr>
+
+    </table>
+
+    <script>
+    
+        function random(n) {
+            return Math.random() * n | 0;
+        }
+
+        let width = 640;
+        let height = 360;
+
+        let canvas = document.getElementById("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        let ctx = canvas.getContext("2d");
+
+        let numberOfBoids = document.getElementById("boids");
+
+        let flock = [];
+
+        let alignmentRadius = document.getElementById("alignmentRadius");
+        let alignmentForce = document.getElementById("alignmentForce");
+        let alignmentWeight = document.getElementById("alignmentWeight");
+        let alignmentShow = document.getElementById("alignmentShow");
+
+        let cohesionRadius = document.getElementById("cohesionRadius");
+        let cohesionForce = document.getElementById("cohesionForce");
+        let cohesionWeight = document.getElementById("cohesionWeight");
+        let cohesionShow = document.getElementById("cohesionShow");
+
+        let separationRadius = document.getElementById("separationRadius");
+        let separationForce = document.getElementById("separationForce");
+        let separationWeight = document.getElementById("separationWeight");
+        let separationShow = document.getElementById("separationShow");
+
+        let forces
+
+        function render() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, width, height);
+
+            forces = {
+                alignmentRadius: parseFloat(alignmentRadius.value),
+                maxAlignmentForce: parseFloat(alignmentForce.value),
+                alignmentWeight: parseFloat(alignmentWeight.value),
+                showAlignment: alignmentShow.checked,
+
+                cohesionRadius: parseFloat(cohesionRadius.value),
+                maxCohesionForce: parseFloat(cohesionForce.value),
+                cohesionWeight: parseFloat(cohesionWeight.value),
+                showCohesion: cohesionShow.checked,
+
+                separationRadius: parseFloat(separationRadius.value),
+                maxSeparationForce: parseFloat(separationForce.value),
+                separationWeight: parseFloat(separationWeight.value),
+                showSeparation: separationShow.checked,
+            }
+
+            let n = parseInt(numberOfBoids.value);
+
+            while(flock.length < n) {
+                flock.push(new Boid(new Vector(random(width), random(height))));
+            }
+
+            while(flock.length > n) {
+                flock.pop();
+            }
+
+            for(let boid of flock) {
+                boid.setForces(forces);
+                boid.flock(flock)
+                boid.update();
+                boid.edge(width, height);
+                boid.draw(ctx);
+            }
+
+            requestAnimationFrame(render)
+        }
+
+        render();
+        
+    </script>
+
+</body>
+</html>

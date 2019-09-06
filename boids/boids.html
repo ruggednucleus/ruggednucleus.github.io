@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="boid.js"></script>
+    <script src="../vector/vector.js"></script>
+    <title>Boids</title>
+    <style>
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+    
+        function random(n) {
+            return Math.random() * n | 0;
+        }
+
+        let width = 640;
+        let height = 360;
+
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        let flock = [];
+
+        function render() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, width, height);
+
+            for(let boid of flock) {
+                boid.flock(flock)
+                boid.update();
+                boid.edge(width, height);
+                boid.draw(ctx);
+            }
+
+            requestAnimationFrame(render)
+        }
+
+        window.addEventListener("load", function() {
+            console.log("load");
+            width = window.innerWidth;
+            height = window.innerHeight;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            let boids = Math.min(100, width / 10, height / 10);
+
+            for(let i = 0; i < boids; i++) {
+                flock.push(new Boid(new Vector(random(width), random(height))))
+            }
+
+            render();
+        });
+    </script>
+</body>
+</html>
