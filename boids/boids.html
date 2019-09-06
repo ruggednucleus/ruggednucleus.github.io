@@ -47,7 +47,6 @@
         }
 
         window.addEventListener("load", function() {
-            console.log("load");
             width = window.innerWidth;
             height = window.innerHeight;
 
@@ -62,6 +61,16 @@
 
             render();
         });
+
+        window.addEventListener("resize", function() {
+
+            width = window.innerWidth;
+            height = window.innerHeight;
+            
+            canvas.width = width;
+            canvas.height = height;
+        });
+
     </script>
 </body>
 </html>
