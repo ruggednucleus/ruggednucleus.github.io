@@ -19,28 +19,74 @@
 
         window.addEventListener("resize", resize);
 
-        window.addEventListener("touchstart", function(e) {
-            touches = e;
-            if(e.touches.length === 2) {
-                dist = Math.pow(touches.touches[0].x - touches.touches[1].x, 2) + Math.pow(touches.touches[0].y - touches.touches[1].y, 2);
-            }
-        });
+        let pointers = [];
+        let diff = -1;
 
-        window.addEventListener("touchend", function(e) {
-            touches = e;
-        });
-
-        window.addEventListener("touchmove", function(e) {
+        window.addEventListener("pointerdown", pointerDown);
+        window.addEventListener("pointermove", pointerMove);
+        /*
+        window.addEventListener("pointermove", function(e) {
             e.preventDefault();
             if(e.touches.length === 1) {
                 move(e);
             } else if(e.touches.length === 2) {
                 zoom(e);
             }
-        }, {passive: false});
+        }, {passive: false});*/
 
-        let touches;
-        let dist;
+        window.addEventListener("pointerup", pointerUp);
+        window.addEventListener("pointercancel", pointerUp);
+        window.addEventListener("pointerout", pointerUp);
+        window.addEventListener("pointerleave", pointerUp);
+
+        function zoom(e) {
+        }
+
+        function move(e) {
+            console.log(e)
+            let movementX = e.pageX - pointers[0].pageX;
+            let movementY = e.pageY - pointers[0].pageY;
+            x += movementX;
+            y += movementY;
+            for (var i = 0; i < pointers.length; i++) {
+                if (e.pointerId == pointers[i].pointerId) {
+                    pointers[i] = e;
+                    break;
+                }
+            }
+        }
+
+        function pointerDown(e) {
+            pointers.push(e);
+        }
+
+        function pointerMove(e) {
+            //e.preventDefault();
+            if(pointers.length === 1) {
+                move(e);
+            } else if(pointers.length === 2) {
+                zoom(e);
+            }
+        }
+
+        function pointerUp(e) {
+            console.log("up", e)
+            removePointer(e);
+            if(pointers.length < 2) {
+                diff = -1;
+            }
+        }
+
+        function removePointer(e) {
+            for (var i = 0; i < pointers.length; i++) {
+                if (pointers[i].pointerId == e.pointerId) {
+                    pointers.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        
 
         let canvas = document.getElementById("canvas");
         let ctx = canvas.getContext("2d");
@@ -62,25 +108,6 @@
             requestAnimationFrame(loop);
         }
         requestAnimationFrame(loop);
-
-        function zoom(e) {
-            let new_dist = Math.pow(e.touches[0].x - e.touches[1].x, 2) + Math.pow(e.touches[0].y - e.touches[1].y, 2);
-            if(new_dist < dist) {
-                scale *= 0.9;
-            } else {
-                scale *= 1.1;
-            }
-
-            dist = new_dist;
-        }
-
-        function move(e) {
-            let movementX = e.touches[0].pageX - touches.touches[0].pageX;
-            let movementY = e.touches[0].pageY - touches.touches[0].pageY;
-            x += movementX;
-            y += movementY;
-            touches = e;
-        }
 
         function resize() {
             canvas.width = window.innerWidth;
