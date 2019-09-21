@@ -24,7 +24,7 @@
         let diff = -1;
 
         window.addEventListener("touchstart", touchDown);
-        window.addEventListener("touchmove", touchMove, );
+        window.addEventListener("touchmove", touchMove, {passive: false});
         /*
         window.addEventListener("touchmove", function(e) {
             e.preventDefault();
@@ -41,6 +41,24 @@
         window.addEventListener("touchleave", touchUp);
 
         function zoom(e) {
+            for (var i = 0; i < touches.length; i++) {
+                if (e.touches[0].identifier == touches[i].identifier) {
+                    touches[i] = e.touches[0];
+                    break;
+                }
+            }
+
+            let curDiff = Math.abs(touches[0].clientX - touches[1].clientX);
+            
+            if(diff > 0) {
+                if(curDiff > diff) {
+                    scale *= 1.1;
+                } else if (curDiff < diff) {
+                    scale *= 0.9;
+                }
+            }
+
+            diff = curDiff;
         }
 
         function move(e) {
@@ -55,6 +73,7 @@
                     break;
                 }
             }
+
         }
 
         function touchDown(e) {
