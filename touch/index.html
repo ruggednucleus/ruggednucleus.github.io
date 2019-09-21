@@ -24,7 +24,7 @@
         let diff = -1;
 
         window.addEventListener("touchstart", touchDown);
-        window.addEventListener("touchmove", touchMove, {passive: false});
+        window.addEventListener("touchmove", touchMove, );
         /*
         window.addEventListener("touchmove", function(e) {
             e.preventDefault();
@@ -58,8 +58,7 @@
         }
 
         function touchDown(e) {
-            console.log(e)
-            touches = [];
+            console.log(e);
             for(let i = 0; i < e.touches.length; i++) {
                 touches.push(e.touches[i]);
             }
