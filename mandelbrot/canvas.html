@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandelbrot</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        "use strict"
+
+        let width = 200;
+        let height = 200;
+        let canvas = document.getElementById("canvas");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        let ctx = canvas.getContext("2d");
+        let image = ctx.getImageData(0, 0, width, height);
+
+        let minI = -2;
+        let maxI =  2;
+        let minR = -2;
+        let maxR =  2;
+
+        let maxIterations = 1000;
+
+        let redraw = false;
+
+        function render() {
+            for(let x = 0; x < width; x++) {
+                for(let y = 0; y < height; y++) {
+                    let index = (y * width + x) * 4;
+
+                    let cx = x * (maxR - minR) / width + minR;
+                    let cy = y * (maxI - minI) / height + minI;
+                    let zx = cx;
+                    let zy = cy;
+                    let iterations = 0;
+
+                    for(let i = 0; i < maxIterations; i++) {
+                        let t = 2 * zx * zy + cy;
+                        zx = zx * zx - zy * zy + cx;
+                        zy = t;
+
+                        if(zx * zx + zy * zy > 4.0) {
+                            break;
+                        }
+
+                        iterations += 1.0;
+                    }
+
+                    let color = 0;
+
+                    if(iterations < maxIterations) {
+                        color = iterations / maxIterations * 255 | 0;
+                    }
+
+                    image.data[index + 0] = color;
+                    image.data[index + 1] = color;
+                    image.data[index + 2] = color;
+                    image.data[index + 3] = 255;
+                }
+            }
+
+            ctx.putImageData(image, 0, 0);
+        }
+
+        resize(width, height);
+
+        let thisframetime;
+        let lastframetime = performance.now();
+        let dt;
+        let frames = [];
+        let lastPrintTime = performance.now();
+
+        function loop() {
+            // FPS
+            thisframetime = performance.now();
+            dt = thisframetime - lastframetime;
+            lastframetime = thisframetime;
+            frames.push(dt);
+            if(lastPrintTime + 750 < thisframetime) {
+                lastPrintTime = thisframetime;
+                let avg = 0;
+                for(let i = 0; i < frames.length; i++) {
+                    avg += frames[i];
+                }
+                avg /= frames.length;
+                document.title = (1000 / avg | 0) + " fps";
+            }
+            frames = frames.slice(0, 250);
+
+            // Draw
+            if(redraw) {
+                render();
+                redraw = false;
+            }
+            requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+
+        function resize(w, h) {
+            if(!canvas) {
+                return;
+            }
+
+            width = w;
+            height = h;
+
+            canvas.width = w;
+            canvas.height = h;
+
+            let oldRealRange = maxR - minR;
+            maxR = (maxI - minI) * (width / height) / 1.4 + minR;
+            let newRealRange = maxR - minR;
+            minR -= (newRealRange - oldRealRange) / 2;
+            maxR = (maxI - minI) * (width / height) / 1.4 + minR;
+
+            redraw = true;
+        }
+
+        function zoom(e) {
+            let imaginaryRange = maxI - minI;
+            let newRange;
+            if(e.deltaY < 0) {
+                newRange = imaginaryRange * 0.90;
+            } else {
+                newRange = imaginaryRange * 1.10;
+            }
+
+            let delta = newRange - imaginaryRange;
+            minI -= delta / 2;
+            maxI = minI + newRange;
+
+            resize(width, height);
+
+            redraw = true;
+        }
+
+        function move(e) {
+            if(e.buttons === 1) {
+                let iRange = maxI - minI;
+                let rRange = maxR - minR;
+
+                let iDelta = (e.movementY / canvas.height) * iRange;
+                let rDelta = (e.movementX / canvas.width) * rRange;
+
+                minI -= iDelta;
+                maxI -= iDelta;
+                minR -= rDelta;
+                maxR -= rDelta;
+
+                redraw = true;
+            }
+        }
+
+        window.addEventListener("wheel", zoom);
+        window.addEventListener("mousemove", move);
+
+    </script>
+</body>
+</html>
