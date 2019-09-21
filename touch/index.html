@@ -17,15 +17,16 @@
     <canvas id="canvas"></canvas>
     <script>
 
+        "use strict"
         window.addEventListener("resize", resize);
 
-        let pointers = [];
+        let touches = [];
         let diff = -1;
 
-        window.addEventListener("pointerdown", pointerDown);
-        window.addEventListener("pointermove", pointerMove);
+        window.addEventListener("touchstart", touchDown);
+        window.addEventListener("touchmove", touchMove);
         /*
-        window.addEventListener("pointermove", function(e) {
+        window.addEventListener("touchmove", function(e) {
             e.preventDefault();
             if(e.touches.length === 1) {
                 move(e);
@@ -34,53 +35,57 @@
             }
         }, {passive: false});*/
 
-        window.addEventListener("pointerup", pointerUp);
-        window.addEventListener("pointercancel", pointerUp);
-        window.addEventListener("pointerout", pointerUp);
-        window.addEventListener("pointerleave", pointerUp);
+        window.addEventListener("touchend", touchUp);
+        window.addEventListener("touchcancel", touchUp);
+        window.addEventListener("touchout", touchUp);
+        window.addEventListener("touchleave", touchUp);
 
         function zoom(e) {
         }
 
         function move(e) {
             console.log(e)
-            let movementX = e.pageX - pointers[0].pageX;
-            let movementY = e.pageY - pointers[0].pageY;
+            let movementX = e.touches[0].pageX - touches[0].pageX;
+            let movementY = e.touches[0].pageY - touches[0].pageY;
             x += movementX;
             y += movementY;
-            for (var i = 0; i < pointers.length; i++) {
-                if (e.pointerId == pointers[i].pointerId) {
-                    pointers[i] = e;
+            for (var i = 0; i < touches.length; i++) {
+                if (e.touches[0].identifier == touches[i].identifier) {
+                    touches[i] = e.touches[0];
                     break;
                 }
             }
         }
 
-        function pointerDown(e) {
-            pointers.push(e);
+        function touchDown(e) {
+            console.log(e)
+            touches = [];
+            for(let i = 0; i < e.touches.length; i++) {
+                touches.push(e.touches[i]);
+            }
         }
 
-        function pointerMove(e) {
+        function touchMove(e) {
             //e.preventDefault();
-            if(pointers.length === 1) {
+            if(touches.length === 1) {
                 move(e);
-            } else if(pointers.length === 2) {
+            } else if(touches.length === 2) {
                 zoom(e);
             }
         }
 
-        function pointerUp(e) {
+        function touchUp(e) {
             console.log("up", e)
-            removePointer(e);
-            if(pointers.length < 2) {
+            removetouch(e);
+            if(touches.length < 2) {
                 diff = -1;
             }
         }
 
-        function removePointer(e) {
-            for (var i = 0; i < pointers.length; i++) {
-                if (pointers[i].pointerId == e.pointerId) {
-                    pointers.splice(i, 1);
+        function removetouch(e) {
+            for (var i = 0; i < touches.length; i++) {
+                if (touches[i].touchId == e.touchId) {
+                    touches.splice(i, 1);
                     break;
                 }
             }
