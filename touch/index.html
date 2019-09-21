@@ -37,7 +37,7 @@
             } else if(e.touches.length === 2) {
                 zoom(e);
             }
-        });
+        }, {passive: false});
 
         let touches;
         let dist;
