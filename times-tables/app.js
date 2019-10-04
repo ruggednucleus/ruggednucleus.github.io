@@ -1,6 +1,23 @@
-let canvas, ctx, width, height, t, step;
+let canvas, ctx, width, height;
+let points = 200;
+let start = 0;
+let step = 0.01;
 
 function init() {
+    let params = (new URL(document.location)).searchParams;
+
+    if(params.get("points")) {
+        points = parseInt(params.get("points"));
+    }
+
+    if(params.get("start")) {
+        start = parseFloat(params.get("start"));
+    }
+
+    if(params.get("step")) {
+        step = parseFloat(params.get("step"));
+    }
+
     width = window.innerWidth;
     height = window.innerHeight;
 
@@ -10,13 +27,12 @@ function init() {
     canvas.width = width;
     canvas.height = height;
 
-    t = new TimesTable(200);
-    step = 0;
+    let t = new TimesTable(points);
 
     function loop() {
-        t.render(ctx, Math.min(width, height) / 2 * 0.9, step);
-        step += 0.01;
-        document.title = Math.floor(step * 10) / 10;
+        t.render(ctx, Math.min(width, height) / 2 * 0.9, start);
+        start += step;
+        document.title = Math.floor(start * 10) / 10;
         requestAnimationFrame(loop);
     }
 
