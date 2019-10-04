@@ -23,6 +23,16 @@ function init() {
     requestAnimationFrame(loop);
 
     window.addEventListener("resize", resize);
+
+    document.addEventListener("click", function() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen(); 
+          }
+        }
+    });
 }
 
 function resize() {
@@ -66,8 +76,5 @@ class TimesTable {
         ctx.stroke();
 
         ctx.restore();
-        
-        ctx.fillStyle = "white";
-        ctx.fillText(document.fullscreenEnabled, 10, 10);
     }
 }
