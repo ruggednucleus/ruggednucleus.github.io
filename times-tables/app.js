@@ -66,5 +66,8 @@ class TimesTable {
         ctx.stroke();
 
         ctx.restore();
+        
+        ctx.fillStyle = "white";
+        ctx.fillText(document.fullscreenEnabled, 10, 10);
     }
 }
