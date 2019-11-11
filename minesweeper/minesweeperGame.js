@@ -1,7 +1,7 @@
 "use strict"
 
 class Minesweeper {
-    constructor(cell_size, flag_icon) {
+    constructor(cell_size, flag_icon, touch) {
         this.game_width;
         this.game_height;
         this.number_of_mines;
@@ -25,9 +25,17 @@ class Minesweeper {
         this.canvas_width;
         this.canvas_height;
 
-        this.flower;
+        this.touchEvent = {
+            touchDuration: 400,
+            lastTouch: 0,
+            doubleTabDuration: 500,
+            touchHold: false,
+            timer: null,
+            x: null,
+            y: null,
+        }
 
-        this.addEventListeners();
+        this.addEventListeners(touch);
         this.loop(this);
     }
 
@@ -89,6 +97,16 @@ class Minesweeper {
         }
 
         this.checkGameOver();
+    }
+
+    flagCell(x, y) {
+        let cell = this.minesweeper_board.flag(x, y);
+        if(cell.hidden && !cell.flag) {
+            this.flags_placed--;
+            cell.removeFlag(this.cell_size, this.flag_icon);
+        } else {
+            this.flags_placed++;
+        }
     }
 
     checkGameOver() {
@@ -165,11 +183,11 @@ class Minesweeper {
             for(let x = 0; x < this.game_width; x++) {
                 let cell = this.minesweeper_board.at(x, p.offsetY);
                 if(cell.mine) {
+                    cell.growFlowers(this.cell_size);
                     if(cell.flag) {
                         cell.flag = false;
                         cell.removeFlag(this.cell_size, this.flag_icon);
                     }
-                    cell.growFlowers(this.cell_size);
                 } else {
                     cell.water(p.last_update);
                 }
@@ -200,7 +218,70 @@ class Minesweeper {
 
 
     // Event listeners
-    addEventListeners() {
+    addEventListeners(touch) {
+        if(touch) {
+            this.addTouchEvents();
+        } else {
+            this.addMouseEvents();
+        }
+    }
+
+    addTouchEvents() {
+        this.canvas.addEventListener("touchstart", e => {
+            e.preventDefault();
+            if(this.game_lost || this.game_won) {
+                this.touchEvent.touchHold = true;
+                this.start(this.game_width, this.game_height, this.number_of_mines);
+                return
+            }
+
+            if(performance.now() - this.touchEvent.lastTouch < this.touchEvent.doubleTabDuration) {
+                console.log("Double tab")
+                let cell = this.minesweeper_board.at(this.touchEvent.x, this.touchEvent.y);
+                let neighbors = this.minesweeper_board.getNeighbors(this.minesweeper_board.index(this.touchEvent.x, this.touchEvent.y));
+                let flags = 0;
+                let active_cells = [];
+                for(let neighbor of neighbors) {
+                    if(neighbor.hidden && !neighbor.flag) {
+                        active_cells.push(neighbor);
+                    } else if(neighbor.flag) {
+                        flags++;
+                    }
+                }
+
+                if(!cell.hidden && flags === cell.value) {
+                    active_cells.forEach(element => {
+                        this.showCell(element.x, element.y);
+                    });
+                }
+            } else {
+                this.touchEvent.x = (e.touches[0].pageX - this.canvas.offsetLeft + this.canvas.width / 2) / this.cell_size | 0
+                this.touchEvent.y = (e.touches[0].pageY - this.canvas.offsetTop + this.canvas.height / 2) / this.cell_size | 0
+
+                this.touchEvent.touchHold = false;
+                this.touchEvent.timer = setTimeout(() => this.longTouch(this), this.touchEvent.touchDuration);
+            }
+
+            this.touchEvent.lastTouch = performance.now();
+        });
+
+        this.canvas.addEventListener("touchend", e => {
+            e.preventDefault();
+            if(this.touchEvent.timer) {
+                clearTimeout(this.touchEvent.timer);
+                if(!this.touchEvent.touchHold) {
+                    this.showCell(this.touchEvent.x, this.touchEvent.y);
+                }
+            }
+        });
+    }
+
+    longTouch(self) {
+        self.touchEvent.touchHold = true;
+        self.flagCell(self.touchEvent.x, self.touchEvent.y);
+    }
+
+    addMouseEvents() {
         this.canvas.addEventListener("mousedown", e => {
             e.preventDefault();
 
@@ -246,13 +327,7 @@ class Minesweeper {
                     break;
 
                 case 3:
-                    cell = this.minesweeper_board.flag(x, y);
-                    if(cell.hidden && !cell.flag) {
-                        this.flags_placed--;
-                        cell.removeFlag(this.cell_size, this.flag_icon);
-                    } else {
-                        this.flags_placed++;
-                    }
+                    this.flagCell(x, y);
                     break;
             }
         });

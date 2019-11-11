@@ -81,7 +81,23 @@ class MinesweeperBoard {
 
     createMines(start_x, start_y) {
         let mines = this.number_of_mines;
-        while(mines > 0) {
+        let positions = [];
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 0; y < this.height; y++) {
+                positions.push({x: x, y: y});
+            }
+        }
+        while(mines > 0 && positions.length) {
+            let pos = positions.splice(Math.random() * positions.length | 0, 1)[0];
+            let index = this.index(pos.x, pos.y);
+            let dist = Math.pow(start_x - pos.x, 2) + Math.pow(start_y - pos.y, 2);
+            if(dist > 2) {
+                this.board[index].mine = true;
+                this.mines.push(this.board[index]);
+                mines--;
+            }
+
+            /*
             let x = Math.random() * this.width | 0;
             let y = Math.random() * this.height | 0;
             let index = this.index(x, y);
@@ -91,6 +107,7 @@ class MinesweeperBoard {
                 this.mines.push(this.board[index]);
                 mines--;
             }
+            */
         }
     }
 
