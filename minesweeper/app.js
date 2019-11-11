@@ -28,6 +28,9 @@ function startGame(flag_icon) {
         mines = parseInt(url.searchParams.get("mines"));
     }
     
+    if(url.searchParams.get("size")) {
+        size = parseInt(url.searchParams.get("size"));
+    }
 
     ms = new Minesweeper(size, flag_icon, "ontouchstart" in window);
     canvas = ms.canvas;
