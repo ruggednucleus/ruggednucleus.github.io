@@ -54,6 +54,7 @@ class Minesweeper {
         this.game_width = width;
         this.game_height = height;
         this.number_of_mines = number_of_mines;
+        this.flags_placed = 0;
 
         this.resizeGame();
 
