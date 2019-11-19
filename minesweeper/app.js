@@ -2,18 +2,24 @@
 
 let canvas, ctx, minesweeperBoard, cells, ms;
 
-function loadImage(src, callback) {
-    let image = new Image();
-    image.src = src;
-    image.onload = () => callback(image);
+function loadImages(names, files, onAllLoaded) {
+    var i, numLoading = names.length;
+    const onload = () => --numLoading === 0 && onAllLoaded(images);
+    const images = {};
+    for (i = 0; i < names.length; i++) {
+        const img = images[names[i]] = new Image;
+        img.src = files[i];
+        img.onload = onload;
+    }   
+    return images;
 }
 
-function startGame(flag_icon) {
-    let size = 40;
+function startGame(icons) {
+    let size = 0;
 
-    let width =  8 // 10,18,24;
-    let height = 10 //  8,14,20;
-    let mines =  10 // 10,40,99;
+    let width =  18 // 10,18,24;
+    let height = 16 //  8,14,20;
+    let mines =  40 // 10,40,99;
 
     let url = new URL(window.location);
     if(url.searchParams.get("width")) {
@@ -27,12 +33,13 @@ function startGame(flag_icon) {
     if(url.searchParams.get("mines")) {
         mines = parseInt(url.searchParams.get("mines"));
     }
-    
+
     if(url.searchParams.get("size")) {
         size = parseInt(url.searchParams.get("size"));
     }
+    
 
-    ms = new Minesweeper(size, flag_icon, "ontouchstart" in window);
+    ms = new Minesweeper(size, icons, "ontouchstart" in window);
     canvas = ms.canvas;
 
     document.body.appendChild(canvas);
@@ -43,5 +50,5 @@ function startGame(flag_icon) {
 }
 
 function init() {
-    loadImage("flag_icon.png", startGame);
+    loadImages(["flag", "clock"], ["flag_icon.png", "clock_icon.png"], startGame);
 }

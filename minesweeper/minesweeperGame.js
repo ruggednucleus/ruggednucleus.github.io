@@ -1,7 +1,7 @@
 "use strict"
 
 class Minesweeper {
-    constructor(cell_size, flag_icon, touch) {
+    constructor(cell_size, icons, touch) {
         this.game_width;
         this.game_height;
         this.number_of_mines;
@@ -15,20 +15,31 @@ class Minesweeper {
         this.flags_placed = 0;
 
         this.cell_size = cell_size;
-        this.flag_icon = flag_icon;
+
+        this.flag_icon = icons.flag;
+        this.clock_icon = icons.clock;
 
         this.active_cells = [];
         this.mouse_down = 0;
 
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
-        this.canvas_width;
-        this.canvas_height;
+        this.canvas_width = window.innerWidth;
+        this.canvas_height = window.innerHeight;
+
+        this.game_offsetX = 0;
+        this.game_offsetY = 0;
+
+        this.border_width = 3;
+        this.border_style = "#14be14";
+        this.top_size = 0;
+
+        this.time = 0;
 
         this.touchEvent = {
-            touchDuration: 400,
+            touchDuration: 200,
             lastTouch: 0,
-            doubleTabDuration: 500,
+            doubleTabDuration: 250,
             touchHold: false,
             timer: null,
             x: null,
@@ -44,7 +55,7 @@ class Minesweeper {
         this.game_height = height;
         this.number_of_mines = number_of_mines;
 
-        this.resizeCanvas();
+        this.resizeGame();
 
         this.minesweeper_board = new MinesweeperBoard(this.game_width, this.game_height, this.number_of_mines);
 
@@ -70,13 +81,40 @@ class Minesweeper {
         requestAnimationFrame(() => self.loop(self));
     }
 
-    updateUI() {/*
-        this.ui_time.innerText = this.getTime();
-        this.ui_flags.innerText = this.number_of_mines - this.flags_placed;*/
+    updateUI() {
+        this.time = this.getTime();
+        if(this.time < 10) {
+            this.time = "00" + this.time;
+        } else if(this.time < 100) {
+            this.time = "0" + this.time;
+        }
+    }
+
+    renderUI() {
+        this.ctx.textAlign = "left";
+        let fontSize = this.cell_size * 0.9;
+        this.ctx.font = fontSize + "px monospace";
+        this.ctx.fillStyle = "white";
+
+        let width = this.ctx.measureText(this.number_of_mines - this.flags_placed).width + this.ctx.measureText(this.time).width + this.cell_size * 3 | 0;
+        let x = this.game_width * this.cell_size / 2 - width / 2;
+        let y = -this.top_size + this.top_size / 2 - this.cell_size / 2;
+
+        this.ctx.drawImage(this.flag_icon, 0, 0, this.flag_icon.width, this.flag_icon.height, x, y, this.cell_size, this.cell_size);
+        this.ctx.fillText(this.number_of_mines - this.flags_placed, x + this.cell_size, -fontSize / 2);
+
+        this.ctx.drawImage(this.clock_icon, 0, 0, this.flag_icon.width, this.flag_icon.height, x + this.cell_size * 3, y, this.cell_size, this.cell_size);
+        this.ctx.fillText(this.time, x + this.cell_size * 4, -fontSize / 2)
     }
 
     render() {
         this.ctx.clearRect(0, 0, this.canvas_width, this.canvas_height);
+        this.ctx.save();
+        this.ctx.translate(this.offsetX, this.offsetY);
+        // UI
+        this.ctx.fillStyle = this.border_style;
+        this.ctx.fillRect(0, -this.top_size, this.game_width * this.cell_size, this.top_size * 2);
+        this.renderUI();
 
         // Render cells
         for(let cell of this.minesweeper_board.board) {
@@ -88,6 +126,7 @@ class Minesweeper {
         for(let cell of this.minesweeper_board.board) {
             cell.renderParticles(this.ctx, this.cell_size);
         }
+        this.ctx.restore();
     }
 
     showCell(x, y) {
@@ -172,7 +211,7 @@ class Minesweeper {
     setupGameWon() {
         this.game_won = true;
         this.game_won_parameters.last_update = performance.now() + 200;
-        this.game_won_parameters.wait = 100;
+        this.game_won_parameters.wait = 200;
         this.game_won_parameters.offsetY = 0;
     }
 
@@ -206,14 +245,22 @@ class Minesweeper {
 
     setCellSize(size) {
         this.cell_size = size;
-        this.resizeCanvas();
+        this.resizeGame();
     }
 
-    resizeCanvas() {
-        this.canvas_width = this.game_width * this.cell_size;
-        this.canvas_height = this.game_height * this.cell_size;
+    resizeGame() {
+        this.canvas_width = window.innerWidth;
+        this.canvas_height = window.innerHeight;
         this.canvas.width = this.canvas_width;
         this.canvas.height = this.canvas_height;
+
+        if(!this.cell_size) {
+            this.cell_size = Math.min(this.canvas_width * 0.9 / this.game_width, this.canvas_height * 0.8 / this.game_height ) | 0;
+        }
+        
+        this.top_size = this.cell_size * 1.5 | 0;
+        this.offsetX = this.canvas_width / 2 - this.cell_size * this.game_width / 2 | 0;
+        this.offsetY = this.canvas_height / 2 - this.cell_size * (this.game_height - 1.5) / 2 | 0;
     }
 
 
@@ -236,7 +283,6 @@ class Minesweeper {
             }
 
             if(performance.now() - this.touchEvent.lastTouch < this.touchEvent.doubleTabDuration) {
-                console.log("Double tab")
                 let cell = this.minesweeper_board.at(this.touchEvent.x, this.touchEvent.y);
                 let neighbors = this.minesweeper_board.getNeighbors(this.minesweeper_board.index(this.touchEvent.x, this.touchEvent.y));
                 let flags = 0;
@@ -255,8 +301,16 @@ class Minesweeper {
                     });
                 }
             } else {
-                this.touchEvent.x = (e.touches[0].pageX - this.canvas.offsetLeft + this.canvas.width / 2) / this.cell_size | 0
-                this.touchEvent.y = (e.touches[0].pageY - this.canvas.offsetTop + this.canvas.height / 2) / this.cell_size | 0
+                let x = (e.touches[0].pageX - this.offsetX) / this.cell_size
+                let y = (e.touches[0].pageY - this.offsetY) / this.cell_size
+
+                if(x < 0 || y < 0 || x >= this.game_width || y >= this.game_height) {
+                    this.active_cells = [];
+                    return;
+                }
+
+                this.touchEvent.x = x | 0;
+                this.touchEvent.y = y | 0;
 
                 this.touchEvent.touchHold = false;
                 this.touchEvent.timer = setTimeout(() => this.longTouch(this), this.touchEvent.touchDuration);
@@ -292,8 +346,16 @@ class Minesweeper {
                 return
             }
 
-            let x = e.offsetX / this.cell_size | 0;
-            let y = e.offsetY / this.cell_size | 0;
+            let x = (e.pageX - this.offsetX) / this.cell_size;
+            let y = (e.pageY - this.offsetY) / this.cell_size;
+
+            if(x < 0 || y < 0 || x >= this.game_width || y >= this.game_height) {
+                this.active_cells = [];
+                return;
+            }
+
+            x |= 0;
+            y |= 0;
             this.mouse_down = e.which;
 
             let cell;
@@ -333,16 +395,32 @@ class Minesweeper {
         });
 
         window.addEventListener("mouseup", e => {
-            let x = e.offsetX / this.cell_size | 0;
-            let y = e.offsetY / this.cell_size | 0;
+            let x = (e.pageX - this.offsetX) / this.cell_size;
+            let y = (e.pageY - this.offsetY) / this.cell_size;
+
+            if(x < 0 || y < 0 || x >= this.game_width || y >= this.game_height) {
+                this.active_cells = [];
+                return;
+            }
+
+            x |= 0;
+            y |= 0;
             this.active_cells = [this.minesweeper_board.at(x, y)];
 
             this.mouse_down = 0;
         });
 
         this.canvas.addEventListener("mousemove", e => {
-            let x = e.offsetX / this.cell_size | 0;
-            let y = e.offsetY / this.cell_size | 0;
+            let x = (e.pageX - this.offsetX) / this.cell_size;
+            let y = (e.pageY - this.offsetY) / this.cell_size;
+
+            if(x < 0 || y < 0 || x >= this.game_width || y >= this.game_height) {
+                this.active_cells = [];
+                return;
+            }
+
+            x |= 0;
+            y |= 0;
 
             let cell = this.minesweeper_board.at(x, y);
             let neighbors = this.minesweeper_board.getNeighbors(this.minesweeper_board.index(x, y));
