@@ -91,6 +91,8 @@ class Minesweeper {
             this.time = "00" + this.time;
         } else if(this.time < 100) {
             this.time = "0" + this.time;
+        } else if(this.time > 999) {
+            this.time = 999;
         }
     }
 
