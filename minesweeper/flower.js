@@ -10,6 +10,7 @@ class Flower {
         this.decay = 0.02;
         this.colors = [
             "#305ee6", "#0b1f5b", // Blue
+            "#14be14", "#0a5c0a", // Green
             "#e63c30", "#5b110b", // Red
             "#8f32d1", "#381353", // Purple
             "#ed8013", "#5f3307", // Orange

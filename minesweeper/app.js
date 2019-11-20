@@ -18,7 +18,7 @@ function startGame(icons) {
     let size = 0;
 
     let width =  18 // 10,18,24;
-    let height = 16 //  8,14,20;
+    let height = 14 //  8,14,20;
     let mines =  40 // 10,40,99;
 
     let url = new URL(window.location);

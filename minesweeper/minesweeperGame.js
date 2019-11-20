@@ -14,6 +14,8 @@ class Minesweeper {
         this.start_time = 0;
         this.flags_placed = 0;
 
+        this.start_click = false;
+
         this.cell_size = cell_size;
 
         this.flag_icon = icons.flag;
@@ -31,15 +33,16 @@ class Minesweeper {
         this.game_offsetY = 0;
 
         this.border_width = 3;
-        this.border_style = "#14be14";
+        this.border_style = "#0f8f0f";
+        //this.border_style = "#14be14";
         this.top_size = 0;
 
         this.time = 0;
 
         this.touchEvent = {
-            touchDuration: 200,
+            touchDuration: 400,
             lastTouch: 0,
-            doubleTabDuration: 250,
+            doubleTabDuration: 500,
             touchHold: false,
             timer: null,
             x: null,
@@ -63,7 +66,7 @@ class Minesweeper {
         this.playing = true;
         this.game_lost = false;
         this.game_won = false;
-        this.start_time = performance.now();
+        this.start_click = false;
     }
 
     loop(self) {
@@ -92,20 +95,21 @@ class Minesweeper {
     }
 
     renderUI() {
-        this.ctx.textAlign = "left";
-        let fontSize = this.cell_size * 0.9;
+        this.ctx.textAlign = "right";
+        let fontSize = this.cell_size * 0.5;
         this.ctx.font = fontSize + "px monospace";
         this.ctx.fillStyle = "white";
 
-        let width = this.ctx.measureText(this.number_of_mines - this.flags_placed).width + this.ctx.measureText(this.time).width + this.cell_size * 3 | 0;
+        let text_width = this.ctx.measureText(this.time).width
+        let width = text_width * 2 + this.cell_size * 3 | 0;
         let x = this.game_width * this.cell_size / 2 - width / 2;
         let y = -this.top_size + this.top_size / 2 - this.cell_size / 2;
 
-        this.ctx.drawImage(this.flag_icon, 0, 0, this.flag_icon.width, this.flag_icon.height, x, y, this.cell_size, this.cell_size);
-        this.ctx.fillText(this.number_of_mines - this.flags_placed, x + this.cell_size, -fontSize / 2);
-
-        this.ctx.drawImage(this.clock_icon, 0, 0, this.flag_icon.width, this.flag_icon.height, x + this.cell_size * 3, y, this.cell_size, this.cell_size);
-        this.ctx.fillText(this.time, x + this.cell_size * 4, -fontSize / 2)
+        this.ctx.fillText(this.number_of_mines - this.flags_placed,  x + text_width, -this.top_size / 2 + fontSize / 3);
+        this.ctx.drawImage(this.flag_icon, 0, 0, this.flag_icon.width, this.flag_icon.height, x + text_width + this.cell_size * 0.2, y, this.cell_size, this.cell_size);
+        
+        this.ctx.fillText(this.time,  x + width - this.cell_size - this.cell_size * 0.2, -this.top_size / 2 + fontSize / 3)
+        this.ctx.drawImage(this.clock_icon, 0, 0, this.flag_icon.width, this.flag_icon.height, x + width - this.cell_size, y, this.cell_size, this.cell_size);
     }
 
     render() {
@@ -141,7 +145,11 @@ class Minesweeper {
 
     flagCell(x, y) {
         let cell = this.minesweeper_board.flag(x, y);
-        if(cell.hidden && !cell.flag) {
+        if(!cell.hidden) {
+            return;
+        }
+
+        if(!cell.flag) {
             this.flags_placed--;
             cell.removeFlag(this.cell_size, this.flag_icon);
         } else {
@@ -241,7 +249,11 @@ class Minesweeper {
 
 
     getTime() {
-        return (performance.now() - this.start_time) / 1000 | 0;
+        if(this.start_click) {
+            return (performance.now() - this.start_time) / 1000 | 0;
+        } else {
+            return 0;
+        }
     }
 
     setCellSize(size) {
@@ -325,6 +337,10 @@ class Minesweeper {
             if(this.touchEvent.timer) {
                 clearTimeout(this.touchEvent.timer);
                 if(!this.touchEvent.touchHold) {
+                    if(!this.start_click) {
+                        this.start_click = true;
+                        this.start_time = performance.now();
+                    }
                     this.showCell(this.touchEvent.x, this.touchEvent.y);
                 }
             }
@@ -362,6 +378,10 @@ class Minesweeper {
             let cell;
             switch(e.which) {
                 case 1:
+                    if(!this.start_click) {
+                        this.start_click = true;
+                        this.start_time = performance.now();
+                    }
                     this.showCell(x, y);
                     break;
                 

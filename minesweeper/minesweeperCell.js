@@ -27,7 +27,7 @@ class MinesweeperCell {
             numbers: ["#000000", "#305ee6", "#14be14", "#e63c30", "#8f32d1", "#ed8013", "#0fd6d2", "#dde80e", "#e61cdb"],
             mines: [
                 "#305ee6", "#0b1f5b", // Blue
-            //  "#14be14", "#0a5c0a", // Green
+                "#14be14", "#0a5c0a", // Green
                 "#e63c30", "#5b110b", // Red
                 "#8f32d1", "#381353", // Purple
                 "#ed8013", "#5f3307", // Orange
