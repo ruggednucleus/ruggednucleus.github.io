@@ -22,6 +22,7 @@ class Options {
 const options = new Options();
 
 const gui = new dat.GUI();
+gui.close();
 gui.add(options, "angle", 0, 90);
 gui.add(options, "minSpeed", 0, 30, 1);
 gui.add(options, "maxSpeed", 0, 30);
