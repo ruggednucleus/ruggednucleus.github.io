@@ -27,7 +27,7 @@ class Firework {
                 } else {
                     this.particles[i].applyForce(gravity);
                     this.particles[i].update();
-                    this.particles[i].velocity.mult(0.95)
+                    this.particles[i].velocity.mult(options.explosionSpeedMultiplier)
                 }
             }
         }
@@ -36,8 +36,13 @@ class Firework {
     explode() {
         const x = this.firework.position.x;
         const y = this.firework.position.y;
-        for(let i = 0; i < 100; i++) {
-            const particle = new Particle(x, y, Math.random() * 360, Math.random() * 10, 4);
+        for(let i = 0; i < options.explosionSize; i++) {
+            const particle = new Particle(
+                x, y,
+                Math.random() * (options.explosionEndAngle - options.explosionStartAngle) + options.explosionStartAngle,
+                Math.random() * (options.explosionMaxVelocity - options.explosionMinVelocity) + options.explosionMinVelocity,
+                options.decay
+            );
             particle.velocity.add(this.firework.velocity);
             this.particles.push(particle);
         }
