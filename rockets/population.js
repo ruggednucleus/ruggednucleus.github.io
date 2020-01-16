@@ -72,7 +72,7 @@ class Population {
                     if(this.showPath) {
                         const rgb = hslToRgb(this.h, this.s, this.l);
                         const color = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
-                        rocket.showPath(this.pathCtx, color, this.alpha);
+                        rocket.showPath(this.pathCtx, color, this.alpha, 1);
                     }
                 }
             }
@@ -138,7 +138,7 @@ class Population {
             ctx.drawImage(this.pathCanvas, 0, 0);
             const rgb = hslToRgb(this.h, this.s, this.l);
             const color = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
-            this.rockets.forEach(rocket => rocket.showPath(ctx, color, this.alpha));
+            this.rockets.forEach(rocket => rocket.showPath(ctx, color, this.alpha, 10));
         }
 
         ctx.save();
