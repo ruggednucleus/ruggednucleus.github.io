@@ -1,5 +1,5 @@
 class Population {
-    constructor(size, x, y, DNALength) {
+    constructor(size, x, y, DNALength, showPath) {
         this.size = size;
         this.x = x;
         this.y = y;
@@ -26,6 +26,18 @@ class Population {
         for(let i = 0; i < size; i++) {
             this.rockets.push(new Rocket(x, y, this.fuel, DNA.randomDNA(DNALength, 3, 20)));
         }
+
+        this.showPath = showPath;
+
+        this.pathCanvas = document.createElement("canvas");
+        this.pathCanvas.width = canvasWidth;
+        this.pathCanvas.height = canvasHeight;
+        this.pathCtx = this.pathCanvas.getContext("2d");
+
+        this.alpha = 0.01;
+        this.h = Math.random();
+        this.s = 1;
+        this.l = 0.5;
     }
 
     update() {
@@ -40,8 +52,8 @@ class Population {
                 rocket.calculateDistanceToTarget(this.targetX, this.targetY);
 
                 if(rocket.checkCollision(
-                    this.targetX - this.targetRadius / 2, this.targetY - this.targetRadius / 2,
-                    this.targetX + this.targetRadius / 2, this.targetY + this.targetRadius / 2,))
+                    this.targetX - this.targetRadius, this.targetY - this.targetRadius,
+                    this.targetX + this.targetRadius, this.targetY + this.targetRadius))
                 {
                     rocket.foundTarget = true;
                 } else if(rocket.position.y > canvasHeight ||
@@ -57,11 +69,19 @@ class Population {
                     this.deadRockets.push(rocket);
                     this.rockets.splice(i, 1);
                     i--;
+                    if(this.showPath) {
+                        const rgb = hslToRgb(this.h, this.s, this.l);
+                        const color = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
+                        rocket.showPath(this.pathCtx, color, this.alpha);
+                    }
                 }
             }
         } else {
             this.evaluate();
             this.selection();
+
+            this.h += 0.01;
+            this.h = this.h % 1;
         }
     }
 
@@ -114,6 +134,13 @@ class Population {
     }
 
     show(ctx) {
+        if(this.showPath) {
+            ctx.drawImage(this.pathCanvas, 0, 0);
+            const rgb = hslToRgb(this.h, this.s, this.l);
+            const color = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
+            this.rockets.forEach(rocket => rocket.showPath(ctx, color, this.alpha));
+        }
+
         ctx.save();
         ctx.fillStyle = "blue";
         ctx.beginPath();

@@ -33,6 +33,8 @@ class Rocket {
         this.foundTarget = false;
         this.crashed = false;
         this.outOfBound = false;
+
+        this.path = [{x, y}];
     }
 
     applyForce(force) {
@@ -73,6 +75,8 @@ class Rocket {
         this.acceleration.mult(0);
 
         this.position.add(this.velocity);
+
+        this.path.push({x: this.position.x, y: this.position.y});
     }
 
     calculateDistanceToTarget(x, y) {
@@ -87,6 +91,7 @@ class Rocket {
 //        Math.sqrt(this.dist) / maxDist * -maxDist + maxDist;
 //console.log(1 - this.dist / maxDist);
         this.fitness = 1 - this.dist / maxDist;
+        this.fitness *= this.fitness;
         if(this.foundTarget) {
             this.fitness *= 10;
         }
@@ -102,11 +107,27 @@ class Rocket {
         return this.position.x > x1 && this.position.x < x2 && this.position.y > y1 && this.position.y < y2 || x > x1 && x < x2 && y > y1 && y < y2;
     }
 
+    showPath(ctx, color, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(this.path[0].x, this.path[0].y);
+        this.path.forEach((point, index) => {
+            if(index % 1 === 0) {
+                ctx.lineTo(point.x, point.y);
+            }
+        });
+        ctx.stroke();
+        ctx.restore();
+    }
+
     show(ctx) {
         ctx.save();
 
         ctx.fillStyle = "white";
-        ctx.translate(this.position.x, this.position.y);
+        ctx.translate(this.position.x - this.width / 2, this.position.y);
         ctx.rotate(this.angle * Math.PI / 180);
         ctx.fillRect(0, 0, this.height * 0.8, this.width);
 
