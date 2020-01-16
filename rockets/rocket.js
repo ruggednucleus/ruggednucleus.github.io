@@ -107,7 +107,7 @@ class Rocket {
         return this.position.x > x1 && this.position.x < x2 && this.position.y > y1 && this.position.y < y2 || x > x1 && x < x2 && y > y1 && y < y2;
     }
 
-    showPath(ctx, color, alpha) {
+    showPath(ctx, color, alpha, points) {
         ctx.save();
         ctx.globalAlpha = alpha;
         ctx.strokeStyle = color;
@@ -115,7 +115,7 @@ class Rocket {
         ctx.beginPath();
         ctx.moveTo(this.path[0].x, this.path[0].y);
         this.path.forEach((point, index) => {
-            if(index % 1 === 0) {
+            if(index % points === 0) {
                 ctx.lineTo(point.x, point.y);
             }
         });
