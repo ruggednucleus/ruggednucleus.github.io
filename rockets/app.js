@@ -7,7 +7,7 @@ const canvasHeight = window.innerHeight;
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
-let rockets = 100;
+let rockets = 25;
 let url = new URL(window.location);
 if(url.searchParams.get("rockets")) {
     rockets = parseInt(url.searchParams.get("rockets"));
