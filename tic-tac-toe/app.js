@@ -98,7 +98,11 @@ class Game {
     minimax(position, maxDepth, maximizingPlayer, depth) {
         const score = this.evaluate();
         if(score !== 0) {
-            return score;
+            if(score === -1) {
+                return score * maxDepth + depth;
+            } else {
+                return score * maxDepth + depth;
+            }
         }
         if(this.boardFull(position)) {
             return 0;
