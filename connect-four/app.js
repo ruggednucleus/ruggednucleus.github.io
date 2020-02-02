@@ -8,7 +8,7 @@ class Game {
         this.width = 7;
         this.height = 6;
 
-        this.depth = 4;
+        this.depth = 5;
 
         this.board = this.emptyBoard();
 
