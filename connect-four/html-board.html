@@ -1,4 +1,106 @@
-class Game {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Connect Four</title>
+    <style>
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas{
+            position: absolute;
+            display: block;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 4px solid #034bb0;
+            display: none;
+        }
+
+        .board {
+            display: inline-block;
+            border: 0.6vmin solid #034bb0;
+            position: absolute;
+        }
+
+        .row {
+            display: flex;
+        }
+
+        .row > div {
+            background-image: url("box.svg");
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="board">
+        <div class="row">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="row">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="row">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="row">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="row">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="row">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        
+    </div>
+
+    <canvas></canvas>
+    <script>
+    class Game {
     constructor() {
         this.players = {
             red: 0,
@@ -463,6 +565,17 @@ cellSize % 2 !== 0 ? cellSize++ : false;
 canvas.width = 7 * cellSize;
 canvas.height = 6 * cellSize;
 
+const style = document.querySelector("style");
+style.sheet.insertRule(`.row > div {width: ${cellSize}px; height: ${cellSize}px}`);
+
+const boardDiv = document.querySelector(".board");
+const width = 7 * cellSize;
+const height = 6 * cellSize;
+const left = window.innerWidth / 2 - width / 2 | 0;
+const positionTop = window.innerHeight / 2 - height / 2 | 0;
+boardDiv.style.left = (left) + "px";
+boardDiv.style.top = (positionTop) + "px";
+
 const game = new Game();
 let aiTurn = false;
 
@@ -492,3 +605,23 @@ canvas.addEventListener("click", e => {
     }
     
 });
+
+boardDiv.addEventListener("click", e => {
+console.log(e)
+    return
+    e.preventDefault();
+    const evaluation = game.evaluateBoard();
+    if(game.boardFull() || evaluation.redWon || evaluation.yellowWon) {
+        game.reset();
+        return;
+    }
+
+    const x = e.offsetX / (canvas.width / game.width) | 0;
+    if(game.dropDisc("red", x)) {
+        aiTurn = true;
+    }
+    
+});
+    </script>
+</body>
+</html>
