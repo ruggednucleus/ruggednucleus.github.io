@@ -40,7 +40,7 @@ document.addEventListener("keydown", e => {
 let last_touch = undefined;
 const min_movement = 20;
 
-canvas.addEventListener("touchstart", e => {
+document.addEventListener("touchstart", e => {
     e.preventDefault();
     last_touch = e.changedTouches[0];
 });
