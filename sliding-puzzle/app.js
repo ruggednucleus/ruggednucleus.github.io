@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 
 resize();
 
-const game = new Game(2);
+const game = new Game(4);
 game.render(ctx);
 
 function renderLoop() {
