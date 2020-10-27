@@ -75,6 +75,15 @@ class Game {
             sorted_array[i] = numbers[i];
         }
 
+        let dist = 0;
+        for(let i = 0; i < sorted_array.length; i++) {
+            if(sorted_array[i] === this.size * this.size) {
+                dist += (this.size - 1 - i % this.size);
+                dist += (this.size - 1 - (i / this.size | 0));
+                break;
+            }
+        }
+
         let swaps = 0;
         for(let i = 0; i < sorted_array.length; i++) {
             if(sorted_array[i] !== i + 1) {
@@ -90,12 +99,16 @@ class Game {
             }
         }
 
-        if(swaps % 2 !== 0) {
+        console.log(`Distance: ${dist}`, `Swaps: ${swaps}`)
+
+        if(swaps % 2 !== dist % 2) {
+            console.log("Swaped")
             for(let i = 0; i < numbers.length; i++) {
                 if(numbers[i] === this.size * this.size - 1) {
-                    numbers[i] === this.size * this.size - 2;
+                    numbers[i] = this.size * this.size - 2;
+                    console.log(i, numbers[i])
                 } else if(numbers[i] === this.size * this.size - 2){
-                    numbers[i] === this.size * this.size - 1
+                    numbers[i] = this.size * this.size - 1
                 }
             }
         }
