@@ -5,7 +5,8 @@ class Game {
         this.ctx = canvas.getContext("2d");
 
         let snake_position = new Vector(canvas.width / 2, canvas.height / 2);
-        this.snakes.push(new Snake(snake_position, 20, 4));
+        let head_radius = Math.min(canvas.width * 0.02 | 0, canvas.height * 0.02 | 0)
+        this.snakes.push(new Snake(snake_position, head_radius, head_radius * 0.3));
         this.mouse = snake_position.copy();
     }
 
