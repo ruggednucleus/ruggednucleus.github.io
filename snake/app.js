@@ -4,6 +4,21 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let size = 20;
+let speed = 4;
+let length = 20;
+
+let url = new URL(window.location);
+if(url.searchParams.get("size")) {
+    size = parseInt(url.searchParams.get("size"));
+}
+if(url.searchParams.get("speed")) {
+    speed = parseInt(url.searchParams.get("speed"));
+}
+if(url.searchParams.get("length")) {
+    length = parseInt(url.searchParams.get("length"));
+}
+
 function preloadImages(urls) {
     let loaded = 0;
     let images = {}
@@ -30,7 +45,7 @@ function resize() {
     canvas.height = window.innerHeight;
 }
 
-const game = new Game(canvas);
+const game = new Game(canvas, size, speed, length);
 function loop() {
     game.update();
     requestAnimationFrame(loop);
