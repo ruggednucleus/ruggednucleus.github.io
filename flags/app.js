@@ -28,7 +28,14 @@ for(let i = 0; i < options; i++) {
     const button = document.createElement("button");
     buttons.push(button);
     button.addEventListener("click", (e) => {
-        e.target.classList.add(e.target === correct_button ? "correct" : "wrong");
+        for(let i = 0; i < buttons.length; i++) {
+            if(buttons[i] === correct_button) {
+                buttons[i].classList.add("correct");
+            }
+        }
+        if(e.target !== correct_button) {
+            e.target.classList.add("wrong");
+        }
         next_state();
         click_time = performance.now();
     });
