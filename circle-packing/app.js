@@ -54,15 +54,15 @@ function writeText(ctx, text) {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    let font_size = canvas.height;
+    let font_size = ctx.canvas.height;
     let resize_text = true;
     let font = `${font_size}px monospace`;
     let i = 0;
-    while(resize_text && i < 1000) {
+    while(resize_text && i < 10000) {
         i++;
         ctx.font = font;
         let text_size = ctx.measureText(text);
-        if(text_size.width > canvas.width || text_size.actualBoundingBoxAscent + text_size.actualBoundingBoxDescent > canvas.height) {
+        if(text_size.width > ctx.canvas.width || text_size.actualBoundingBoxAscent + text_size.actualBoundingBoxDescent > ctx.canvas.height) {
             font_size--;
             font = `${font_size}px monospace`;
         } else {
@@ -73,8 +73,8 @@ function writeText(ctx, text) {
     ctx.fillStyle = "white";
     let text_size = ctx.measureText(text);
     let height = text_size.actualBoundingBoxAscent + text_size.actualBoundingBoxDescent;
-    let offsetX = canvas.width * 0.5 - text_size.width * 0.5;
-    let offsetY = canvas.height * 0.5 - height * 0.5;
+    let offsetX = ctx.canvas.width * 0.5 - text_size.width * 0.5;
+    let offsetY = ctx.canvas.height * 0.5 - height * 0.5;
     //ctx.strokeRect(offsetX, offsetY, text_size.width, height);
     ctx.fillText(text, offsetX, offsetY + text_size.actualBoundingBoxAscent);
     return ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -83,5 +83,7 @@ function writeText(ctx, text) {
 function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    text_canvas.width = canvas.width;
+    text_canvas.height = canvas.height;
 }
 window.addEventListener("resize", resize);
