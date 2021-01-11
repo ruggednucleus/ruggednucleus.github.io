@@ -14,7 +14,7 @@ const circlePacker = new CirclePacker(image_data);
 let last_text = performance.now();
 
 function loop() {
-    if(performance.now() - last_text > 3000) {
+    if(performance.now() - last_text > 5000) {
         write(animals[animals.length * Math.random() | 0]);
         last_text = performance.now();
     }
