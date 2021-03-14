@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rotation</title>
+    <style>
+        body {
+            margin: 0;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            background-color: black;
+        }
+
+        canvas {
+            margin: 0px auto;
+        }
+
+        #buttons {
+            margin: 0px;
+            height: 10vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+        }
+
+        .button {
+            display: flex;
+            border: 1px solid #888;
+            background-color: #333;
+            color: #ccc;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            width: 20vw;
+            height: 5vh;
+            font-size: 20px;
+            font-family: monospace;
+        }
+
+    </style>
+    <script src="board.js"></script>
+    <script src="cell.js"></script>
+</head>
+<body>
+    <canvas></canvas>
+    <div id="buttons">
+        <div class="button" id="step">Step</div>
+        <div class="button" id="start">Start / Stop</div>
+        <div class="button" id="clear">Clear</div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
