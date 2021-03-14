@@ -1,7 +1,9 @@
 const CANVAS = document.querySelector("canvas");
 const CTX = CANVAS.getContext("2d");
 
-const CELL_SIZE = 40;
+let url = new URL(window.location);
+
+const CELL_SIZE = parseInt(url.searchParams.get("size")) || 80;
 const BOARD_WIDTH = (window.innerWidth / CELL_SIZE | 0) * 0.9 - (window.innerWidth / CELL_SIZE | 0) * 0.9 % 2;
 const BOARD_HEIGHT = (window.innerHeight / CELL_SIZE | 0) * 0.9 - (window.innerHeight / CELL_SIZE | 0) * 0.9 % 2;;
 
