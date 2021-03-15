@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game of life</title>
+    <style>
+        body {
+            touch-action: manipulation;
+            margin: 0;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            background-color: black;
+            height: 100vh;
+            justify-content: space-evenly;
+        }
+
+        canvas {
+            margin: 0px auto;
+            border: 1px solid #888;
+        }
+
+        #buttons {
+            margin: 0px;
+            height: 10vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+        }
+
+        .button {
+            display: flex;
+            border: 1px solid #888;
+            background-color: #333;
+            color: #ccc;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            width: 20vw;
+            height: 5vh;
+            font-size: 20px;
+            font-family: monospace;
+        }
+
+    </style>
+    <script src="board.js"></script>
+    <script src="cell.js"></script>
+</head>
+<body>
+    <canvas></canvas>
+    <div id="buttons">
+        <div class="button" id="step">Step</div>
+        <div class="button" id="start">Start</div>
+        <div class="button" id="random">Random</div>
+        <div class="button" id="clear">Clear</div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
