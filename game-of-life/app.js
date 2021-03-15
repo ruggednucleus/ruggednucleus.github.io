@@ -6,7 +6,7 @@ let url = new URL(window.location);
 
 const CELL_SIZE = parseInt(url.searchParams.get("size")) || 4;
 const BOARD_WIDTH = (window.innerWidth / CELL_SIZE) * 0.9 | 0;
-const BOARD_HEIGHT = (window.innerHeight / CELL_SIZE) * 0.9 | 0;
+const BOARD_HEIGHT = (window.innerHeight / CELL_SIZE) * 0.8 | 0;
 
 CANVAS.width = BOARD_WIDTH * CELL_SIZE;
 CANVAS.height = BOARD_HEIGHT * CELL_SIZE;
