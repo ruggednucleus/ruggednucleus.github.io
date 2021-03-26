@@ -4,12 +4,13 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let url = new URL(window.location);
-const scale = parseInt(url.searchParams.get("scale")) || 0.4;
+const scale = parseFloat(url.searchParams.get("scale")) || 0.4;
+const number_of_ants = parseInt(url.searchParams.get("ants")) || 100;
 
 let target = new Vector(0, 0);
 
 const ants = [];
-for(let i = 0; i < 100; i++) {
+for(let i = 0; i < number_of_ants; i++) {
     ants.push(new Ant(new Vector(canvas.width * Math.random() | 0, canvas.height * Math.random() | 0)))
 }
 
