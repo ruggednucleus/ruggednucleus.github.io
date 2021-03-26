@@ -4,7 +4,7 @@ class PathDrawer {
         this.ctx = this.canvas.getContext("2d");
         this.canvas.width = width;
         this.canvas.height = height;
-        document.body.appendChild(this.canvas);
+        //document.body.appendChild(this.canvas);
     }
 
     addPath(from, to) {

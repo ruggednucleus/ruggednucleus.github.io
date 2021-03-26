@@ -1,7 +1,7 @@
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = 800 || window.innerWidth;
-canvas.height = 400 || window.innerHeight;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 let url = new URL(window.location);
 const scale = parseFloat(url.searchParams.get("scale")) || 0.4;
