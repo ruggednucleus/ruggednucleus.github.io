@@ -1,7 +1,7 @@
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = 800 || window.innerWidth;
+canvas.height = 400 || window.innerHeight;
 
 let url = new URL(window.location);
 const scale = parseFloat(url.searchParams.get("scale")) || 0.4;
@@ -11,8 +11,11 @@ let target = new Vector(0, 0);
 
 const ants = [];
 for(let i = 0; i < number_of_ants; i++) {
-    ants.push(new Ant(new Vector(canvas.width * Math.random() | 0, canvas.height * Math.random() | 0)))
+    ants.push(new Ant(new Vector(canvas.width * Math.random() | 0, canvas.height * Math.random() | 0), scale))
 }
+
+const ant_drawer = new AntDrawer(scale);
+const path_drawer = new PathDrawer(canvas.width, canvas.height);
 
 let lastupdate;
 
@@ -25,9 +28,13 @@ function loop(time) {
     ctx.fillStyle = "#dbbd97";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    path_drawer.drawPaths();
+
+    ant_drawer.draw(time);
+
     ants.forEach(ant => {
-        ant.update(target, deltaTime);
-        ant.draw(time, scale);
+        ant.update(deltaTime);
+        ant.draw(ant_drawer.getImage(), path_drawer);
     });
 
 
