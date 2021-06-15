@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="walker.js"></script>
+    <style>
+        body {
+            touch-action: manipulation;
+            margin: 0;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            background-color: #151515;
+            height: 100vh;
+        }
+
+        canvas {
+            margin: 30px auto;
+            border: 2px solid #555;
+            background-color: white
+        }
+
+        #buttons {
+            margin: 0px;
+            height: 10vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .button {
+            display: flex;
+            border: 1px solid #888;
+            background-color: #333;
+            color: #ccc;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            width: 20vw;
+            height: 5vh;
+            font-size: 20px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <canvas></canvas>
+    <br>
+    <div id="buttons">
+        <input id="steps" type="number" value="1">
+        <button id="walk">Walk</button>
+        <button id="reset">Reset</button>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
