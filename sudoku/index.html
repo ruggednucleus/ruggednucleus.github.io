@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku</title>
+    <script src="test-sudokus.js"></script>
+    <script src="sudoku.js"></script>
+    <script src="hitboxes.js"></script>
+    <script src="sudoku-renderer.js"></script>
+    <script src="sudoku-cell.js"></script>
+    <script src="sudoku-solver.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        canvas {
+            position: relative;
+        }
+
+        button {
+            width: 80px;
+            height: 80px;
+            margin: 2px;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+    <label>Sudoku:</label>
+    <select name="sudoku" id="sudoku-select">
+        <option selected disabled difficulty="empty" index="0">-- Select sudoku --</option>
+    </select>
+
+    <br>
+
+    <canvas></canvas>
+
+    <br>
+
+    <button class="number-button" value="1">1</button>
+    <button class="number-button" value="2">2</button>
+    <button class="number-button" value="3">3</button>
+    <br>
+    <button class="number-button" value="4">4</button>
+    <button class="number-button" value="5">5</button>
+    <button class="number-button" value="6">6</button>
+    <br>
+    <button class="number-button" value="7">7</button>
+    <button class="number-button" value="8">8</button>
+    <button class="number-button" value="9">9</button>
+    <br>
+
+    <button id="erase-button">X</button>
+
+    <button id="solve-button">Solve</button>
+    <script src="app.js"></script>
+</body>
+</html>
