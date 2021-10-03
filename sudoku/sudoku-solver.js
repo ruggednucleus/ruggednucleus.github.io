@@ -11,17 +11,21 @@ class SudokuSolver {
             this.solve_sole_candidate,
             this.solve_unique_candidate,
             this.find_all_block_and_column_or_row_interactions,
+            this.find_all_naked_subsets,
         ];
+
+        const times_used = new Array(solving_order.length).fill(0);
 
         let total_i = 0;
         for(let i = 0; total_i < 10000 && i < solving_order.length; i++) {
             total_i++
+            times_used[i]++;
             if(solving_order[i].bind(this)()) {
                 i = -1;
             }
         }
 
-        console.log("Total time: " + (performance.now() - dt));
+        console.log("Total time: " + (performance.now() - dt), times_used, solving_order);
     }
 
     find_all_possible_numbers() {
@@ -252,5 +256,84 @@ class SudokuSolver {
         }
 
         return fund_interaction;
+    }
+
+    find_all_naked_subsets() {
+        const dt = performance.now();
+        let found_subset = false;
+
+        for(let x = 0; x < this.sudoku.size; x++) {
+            if(this.find_naked_subset(this.sudoku.getColumn(x))) {
+                found_subset = true;
+            }
+        }
+
+        for(let y = 0; y < this.sudoku.size; y++) {
+            if(this.find_naked_subset(this.sudoku.getRow(y))) {
+                found_subset = true;
+            }
+        }
+
+        for(let x = 0; x < this.sudoku.blocks_in_row; x++) {
+            for(let y = 0; y < this.sudoku.blocks_in_column; y++) {
+                if(this.find_naked_subset(this.sudoku.getBlock(x * this.sudoku.block_width, y * this.sudoku.block_height))) {
+                    found_subset = true;
+                }
+            }
+        }
+
+        console.log("Find all naked subsets\nTime: " + (performance.now() - dt) + "\nFund subsets: " + found_subset);
+        return found_subset;
+    }
+
+    find_naked_subset(cells) {
+        const max_numbers = 4;
+
+        let found_subset = false;
+
+        for(let i = 0; i < cells.length - 1; i++) {
+            const cell = cells[i];
+            if(cell.value || cell.possible_numbers.length > max_numbers) {
+                continue;
+            }
+
+            const subset = [cell];
+
+            for(let j = i + 1; j < cells.length; j++) {
+                const other_cell = cells[j];
+                if(other_cell.value || cell.possible_numbers.length !== other_cell.possible_numbers.length) {
+                    continue
+                }
+
+                let same_numbers = true;
+                for(let k = 0; same_numbers && k < cell.possible_numbers.length; k++) {
+                    same_numbers = other_cell.possible_numbers.includes(cell.possible_numbers[k]);
+                }
+
+                if(same_numbers) {
+                    subset.push(other_cell);
+                }
+            }
+
+            if(subset.length !== cell.possible_numbers.length) {
+                continue
+            }
+
+            for(let j = 0; j < cells.length; j++) {
+                if(subset.includes(cells[j])) {
+                    continue
+                }
+
+                for(let k = 0; k < cell.possible_numbers.length; k++) {
+                    const index = cells[j].possible_numbers.indexOf(cell.possible_numbers[k])
+                    if(!cells[j].value && index !== -1) {
+                        cells[j].possible_numbers.splice(index, 1);
+                        found_subset = true;
+                    }
+                }
+            }
+        }
+
+        return found_subset;
     }
 }
