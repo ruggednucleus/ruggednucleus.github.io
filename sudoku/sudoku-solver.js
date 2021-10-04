@@ -12,20 +12,39 @@ class SudokuSolver {
             this.solve_unique_candidate,
             this.find_all_block_and_column_or_row_interactions,
             this.find_all_naked_subsets,
+            this.find_all_hidden_subsets,
         ];
 
-        const times_used = new Array(solving_order.length).fill(0);
+        const times_and_time_used = [
+            {name: "Find all possible numbers", used: 0, time: 0},
+            {name: "Solve sole candidate", used: 0, time: 0},
+            {name: "Solve unique candidate", used: 0, time: 0},
+            {name: "Find all block and column / row interactions", used: 0, time: 0},
+            {name: "Find all naked subsets", used: 0, time: 0},
+            {name: "Find all hidden subsets", used: 0, time: 0},
+        ];
 
         let total_i = 0;
         for(let i = 0; total_i < 10000 && i < solving_order.length; i++) {
             total_i++
-            times_used[i]++;
-            if(solving_order[i].bind(this)()) {
-                i = -1;
+            const result = solving_order[i].bind(this)()
+            times_and_time_used[i].used++;
+            times_and_time_used[i].time += result.time;
+
+            if(result.found_somthing) {
+                i = result.find_possible_numbers ? -1 : 0;
             }
         }
 
-        console.log("Total time: " + (performance.now() - dt), times_used, solving_order);
+        console.log("--- Sudoku ---");
+
+        let total_time = 0;
+        times_and_time_used.forEach(func => {
+            total_time += func.time;
+            console.log(`${func.name}:\n    Used ${func.used} time${func.used > 1 ? "s" : ""}\n    Time used: ${(func.time * 100 | 0) / 100}ms`)
+        });
+
+        console.log(`Total time: ${(total_time * 100 | 0) / 100}ms`);
     }
 
     find_all_possible_numbers() {
@@ -34,10 +53,8 @@ class SudokuSolver {
             const coords = this.sudoku.toCoords(i);
             this.find_possible_numbers(coords.x, coords.y)
         }
-
-        console.log("Find all possible numbers\nTime: " + (performance.now() - dt));
         
-        return false;
+        return {found_somthing: false, time: performance.now() - dt, find_possible_numbers: false};
     }
 
     find_possible_numbers(x, y) {
@@ -86,10 +103,8 @@ class SudokuSolver {
                 numbers_placed++;
             }
         }
-
-        console.log("Solve sole candidate\nTime: " + (performance.now() - dt) + "\nNumbers placed: " + numbers_placed);
         
-        return numbers_placed;
+        return {found_somthing: numbers_placed, time: performance.now() - dt, find_possible_numbers: true};
     }
 
     check_sole_candidate(x, y) {
@@ -117,9 +132,7 @@ class SudokuSolver {
             }
         }
 
-        console.log("Solve unique candidate\nTime: " + (performance.now() - dt) + "\nNumbers placed: " + numbers_placed)
-
-        return numbers_placed;;
+        return {found_somthing: numbers_placed, time: performance.now() - dt, find_possible_numbers: true};
     }
 
     check_unique_candidate(x, y) {
@@ -150,17 +163,16 @@ class SudokuSolver {
     
     find_all_block_and_column_or_row_interactions() {
         const dt = performance.now();
-        let fund_interaction = false;
+        let found_interaction = false;
         for(let x = 0; x < this.sudoku.blocks_in_row; x++) {
             for(let y = 0; y < this.sudoku.blocks_in_column; y++) {
                 if(this.find_block_and_column_or_row_interaction(x * this.sudoku.blocks_in_row, y * this.sudoku.blocks_in_column)) {
-                    fund_interaction = true;
+                    found_interaction = true;
                 }
             }
         }
 
-        console.log("Find all block and column or row interactions\nTime: " + (performance.now() - dt) + "\nFund interaction: " + fund_interaction);
-        return fund_interaction;
+        return {found_somthing: found_interaction, time: performance.now() - dt, find_possible_numbers: false};
     }
 
     find_block_and_column_or_row_interaction(block_x, block_y) {
@@ -282,8 +294,7 @@ class SudokuSolver {
             }
         }
 
-        console.log("Find all naked subsets\nTime: " + (performance.now() - dt) + "\nFund subsets: " + found_subset);
-        return found_subset;
+        return {found_somthing: found_subset, time: performance.now() - dt, find_possible_numbers: false};
     }
 
     find_naked_subset(cells) {
@@ -334,6 +345,83 @@ class SudokuSolver {
             }
         }
 
+        return found_subset;
+    }
+
+    find_all_hidden_subsets() {
+        const dt = performance.now();
+        let found_subset = false;
+
+        for(let x = 0; x < this.sudoku.size; x++) {
+            if(this.find_hidden_subset(this.sudoku.getColumn(x))) {
+                found_subset = true;
+            }
+        }
+
+        for(let y = 0; y < this.sudoku.size; y++) {
+            if(this.find_hidden_subset(this.sudoku.getRow(y))) {
+                found_subset = true;
+            }
+        }
+
+        for(let x = 0; x < this.sudoku.blocks_in_row; x++) {
+            for(let y = 0; y < this.sudoku.blocks_in_column; y++) {
+                if(this.find_hidden_subset(this.sudoku.getBlock(x * this.sudoku.block_width, y * this.sudoku.block_height))) {
+                    found_subset = true;
+                }
+            }
+        }
+
+        return {found_somthing: found_subset, time: performance.now() - dt, find_possible_numbers: false};
+    }
+
+    find_hidden_subset(cells) {
+        let found_subset = false;
+
+        const max_times_used = 4;
+        const times_used = {};
+        for(let i = 0; i < this.sudoku.size; i++) {
+            times_used[i + 1] = {};
+            times_used[i + 1].times = 0;
+            times_used[i + 1].cells = [];
+        }
+        
+        cells.forEach(cell => {
+            if(!cell.value) {
+                cell.possible_numbers.forEach(number => {
+                    times_used[number].times++;
+                    times_used[number].cells.push(cell);
+                });
+            }
+        });
+
+        for(let i = 1; i <= this.sudoku.size; i++) {
+            if(times_used[i].times >= max_times_used) {
+                continue;
+            }
+
+            let same_cells = true;
+            const numbers = [i];
+            for(let j = i + 1; same_cells && j <= this.sudoku.size; j++) {
+                if(times_used[i].times !== times_used[j].times) {
+                    continue;
+                }
+                numbers.push(j);
+                for(let k = 0; k < times_used[i].cells.length; k++) {
+                    if(!times_used[j].cells.includes(times_used[i].cells[k])) {
+                        same_cells = false;
+                        break;
+                    }
+                }
+            }
+
+            if(same_cells && numbers.length > 1 && numbers.length === times_used[i].times) {
+                times_used[i].cells.forEach(cell => {
+                    cell.possible_numbers = numbers;
+                });
+                found_subset = true;
+            }
+        }
         return found_subset;
     }
 }
