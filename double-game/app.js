@@ -2,16 +2,19 @@
  * 
  * To do:
  *  Ghost block;
+ *  trække nye blocks fra en pose
+ *  prøve at blocken deler sig 
  *
  */
 
 const game = new Game();
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
-const block_size = 100;
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+const block_size = Math.min(canvas.width * 0.9 / game.width, canvas.height * 0.7 / game.height);
 
 const game_width = game.width * block_size;
 const game_height = game.height * block_size;

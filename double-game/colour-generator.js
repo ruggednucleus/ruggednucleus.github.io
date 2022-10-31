@@ -33,6 +33,6 @@ class ColourGenerator {
     static generate(n) {
         //this.hue += this.golden_ratio_conjugate;
         //this.hue %= 1;
-        return this.hsv_to_rgb((this.hue + this.golden_ratio_conjugate * n) % 1, 0.5, 0.95);
+        return this.hsv_to_rgb((this.hue + this.golden_ratio_conjugate * n) % 1, 0.6, 0.80);
     }
 }

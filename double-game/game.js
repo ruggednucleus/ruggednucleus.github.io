@@ -16,6 +16,9 @@ class Game {
     animation_start = 0;
     animation_time = 500;
 
+    animation_merge_time = 200;
+    animation_fall_time = 200;
+
     min_block = 1;
     max_block_multi = 4;
 
@@ -65,6 +68,7 @@ class Game {
 
         this.state = this.states.animating_falling_blocks;
         this.animation_start = performance.now();
+        this.animation_time = this.animation_fall_time;
     }
 
     find_falling_blocks() {
@@ -99,6 +103,7 @@ class Game {
 
         if(found_falling_blocks) {
             this.animation_start = performance.now();
+            this.animation_time = this.animation_fall_time;
             this.state = this.states.animating_falling_blocks;
         } else {
             this.state = this.states.idle;
@@ -109,20 +114,66 @@ class Game {
         this.merging_blocks = [];
 
         this.blocks_moved.forEach(block => {
-            let up_block = this.board[this.position_to_index(block.x, block.y - 1)];
-            if(block.y - 1 >= 0 && up_block.value === block.value) {
-                this.merging_blocks.push(up_block);
-                up_block.add_merge(block);
-                block.value = 0;
-            } 
+            let merge_with = [];
+            let merge_up = false;
+            if(block.value !== 0) {
+                if(block.x - 1 >= 0 && this.board[this.position_to_index(block.x - 1, block.y)].value === block.value) {
+                    merge_with.push(this.board[this.position_to_index(block.x - 1, block.y)]);
+                }
+
+                if(block.x + 1 < this.width && this.board[this.position_to_index(block.x + 1, block.y)].value === block.value) {
+                    merge_with.push(this.board[this.position_to_index(block.x + 1, block.y)]);
+                }
+
+                if(block.y + 1 < this.height && this.board[this.position_to_index(block.x, block.y + 1)].value === block.value) {
+                    //merge_with.push(this.board[this.position_to_index(block.x, block.y + 1)]);
+                }
+
+                if(block.y - 1 >= 0 && this.board[this.position_to_index(block.x, block.y - 1)].value === block.value) {
+                    merge_with.push(this.board[this.position_to_index(block.x, block.y - 1)]);
+                    if(merge_with.length === 1) {
+                        merge_up = true;
+                    }
+                }
+
+                if(merge_with.length) {
+                    if(merge_up) {
+                        merge_with[0].add_merge(block);
+                        block.value = 0;
+                        this.merging_blocks.push(merge_with[0]);
+                    } else {
+                        merge_with.forEach(block_to_be_eaten => {
+                            block.add_merge(block_to_be_eaten);
+                            block_to_be_eaten.value = 0;
+                        });
+                        this.merging_blocks.push(block);
+                    }
+                }
+/* 
+                if(merge_with.length) {
+                    if(merge_with.length === 1) {
+                        merge_with[0].add_merge(block);
+                        block.value = 0;
+                        this.merging_blocks.push(merge_with[0]);
+                    } else {
+                        merge_with.forEach(block_to_be_eaten => {
+                            block.add_merge(block_to_be_eaten);
+                            block_to_be_eaten.value = 0;
+                        });
+                        this.merging_blocks.push(block);
+                    }
+                }
+*/
+            }
         });
 
         if(this.merging_blocks.length) {
-            console.log(this.merging_blocks)
+
             this.merging_blocks.forEach(block => {
                 block.start_merge();
             });
             this.animation_start = performance.now();
+            this.animation_time = this.animation_merge_time;
             this.state = this.states.animating_merging_blocks;
         } else {
             this.state = this.states.find_falling_blocks;
