@@ -3,44 +3,130 @@ class Game {
     height = 7;
     board = [];
 
-    min_block = 2;
+    states = {
+        idle: 1,
+        find_merging_blocks: 2,
+        find_falling_blocks: 3,
+        animating_merging_blocks: 4,
+        animating_falling_blocks: 5,
+    }
+
+    state = 1;
+
+    animation_start = 0;
+    animation_time = 500;
+
+    min_block = 1;
     max_block_multi = 4;
 
-    current_block = 2;
+    current_block = 1;
 
     blocks_moved = [];
+    merging_blocks = [];
 
     constructor() {
         this.create_new_board();
     }
 
+    position_to_index(x, y) {
+        return y * this.width + x;
+    }
+
     create_new_board() {
         this.board = [];
-        for(let x = 0; x < this.width; x++) {
-            this.board[x] = [];
-            for(let y = 0; y < this.height; y++) {
-                this.board[x][y] = 0;
+        for(let y = 0; y < this.height;y++) {
+            for(let x = 0; x < this.width; x++) {
+                this.board.push(new Block(0, x, y));
             }
         }
     }
 
     place_block(coloum) {
-        if(this.board[coloum][this.height - 1] !== 0) {
+        if(this.state !== this.states.idle) {
+            console.log("Please wait!");
+            return
+        }
+
+        if(this.board[this.position_to_index(coloum, this.height - 1)].value !== 0) {
             console.log("Coloum full... Try somewhere else.");
             return;
         }
 
         for(let y = 0; y < this.height; y++) {
-            if(this.board[coloum][y] === 0) {
-                this.board[coloum][y] = this.current_block;
-                this.blocks_moved = [{x: coloum, y, value: this.current_block}];
+            if(this.board[this.position_to_index(coloum, y)].value === 0) {
+                this.board[this.position_to_index(coloum, y)].value = this.current_block;
+                this.blocks_moved = [this.board[this.position_to_index(coloum, y)]];
+                this.board[this.position_to_index(coloum, y)].fallFrom(coloum, this.height);
                 break;
             }
         }
 
-        this.match_blocks();
+        this.current_block = (Math.random() * this.max_block_multi) + this.min_block | 0;
 
-        this.current_block = Math.pow(this.min_block, (Math.random() * this.max_block_multi) + 1 | 0);
+        this.state = this.states.animating_falling_blocks;
+        this.animation_start = performance.now();
+    }
+
+    find_falling_blocks() {
+        this.blocks_moved = [];
+        let found_falling_blocks = false;
+
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 1; y < this.height; y++) {
+                let block = this.board[this.position_to_index(x, y)];
+                if(block.value !== 0) {
+                    let falling_to = y;
+                    for(let i = y - 1; i >= 0; i--) {
+                        if(this.board[this.position_to_index(x, i)].value === 0) {
+                            falling_to = i;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if(falling_to !== y) {
+                        let new_block = this.board[this.position_to_index(x, falling_to)];
+                        new_block.value = block.value;
+                        new_block.fallFrom(x, y);
+                        block.value = 0;
+
+                        this.blocks_moved.push(new_block);
+                        found_falling_blocks = true;
+                    }
+                }
+            }
+        }
+
+        if(found_falling_blocks) {
+            this.animation_start = performance.now();
+            this.state = this.states.animating_falling_blocks;
+        } else {
+            this.state = this.states.idle;
+        }
+    }
+
+    find_merging_blocks() {
+        this.merging_blocks = [];
+
+        this.blocks_moved.forEach(block => {
+            let up_block = this.board[this.position_to_index(block.x, block.y - 1)];
+            if(block.y - 1 >= 0 && up_block.value === block.value) {
+                this.merging_blocks.push(up_block);
+                up_block.add_merge(block);
+                block.value = 0;
+            } 
+        });
+
+        if(this.merging_blocks.length) {
+            console.log(this.merging_blocks)
+            this.merging_blocks.forEach(block => {
+                block.start_merge();
+            });
+            this.animation_start = performance.now();
+            this.state = this.states.animating_merging_blocks;
+        } else {
+            this.state = this.states.find_falling_blocks;
+        }
     }
 
     match_blocks() {
@@ -92,27 +178,62 @@ class Game {
         });
     }
 
+    animate() {
+        let time = performance.now() - this.animation_start;
+
+        if(time >= this.animation_time) {
+            /*
+                To do:
+                Find matches and falling blocks
+            */
+            this.blocks_moved.forEach(block => {
+                block.setIdle();
+            });
+
+            if(this.state === this.states.animating_falling_blocks) {
+                this.state = this.states.find_merging_blocks;
+            }
+
+            if(this.state === this.states.animating_merging_blocks) {
+                this.merging_blocks.forEach(block => {
+                    block.end_merge();
+                });
+                this.blocks_moved = this.merging_blocks;
+                this.state = this.states.find_merging_blocks;
+            }
+        }
+    }
+
+    update() {
+        switch(this.state) {
+            case this.states.find_falling_blocks:
+                this.find_falling_blocks();
+                break;
+
+            case this.states.find_merging_blocks:
+                this.find_merging_blocks();
+                break;
+
+            case this.states.animating_falling_blocks:
+                this.animate();
+                break;
+
+            case this.states.animating_merging_blocks:
+                this.animate();
+                break;
+
+        }
+    }
+
     render(ctx, block_size) {
+        let time = (performance.now() - this.animation_start) / this.animation_time;
+
         ctx.fillStyle = "#2f2f2f";
         ctx.fillRect(0, 0, this.width * block_size, this.height * block_size);
 
         for(let x = 0; x < this.width; x++) {
             for(let y = 0; y < this.height; y++) {
-                if(this.board[x][y]) {
-                    ctx.save();
-                    ctx.translate(x * block_size + block_size * 0.5, y * block_size + block_size * 0.5);
-                    ctx.fillStyle = ColourGenerator.generate(this.board[x][y]);
-                    ctx.beginPath();
-                    ctx.roundRect((-block_size * 0.45) | 0, (-block_size * 0.45) | 0, (block_size * 0.9) | 0, (block_size * 0.9) | 0, block_size * 0.1)
-                    ctx.fill();
-
-                    ctx.fillStyle = "#FFF";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle"
-                    ctx.font = `${block_size * 0.5}px monospace`
-                    ctx.fillText(this.board[x][y], 0, 0, block_size * 0.9)
-                    ctx.restore();
-                }
+                this.board[this.position_to_index(x, y)].render(ctx, block_size, time);
             }
         }
     }

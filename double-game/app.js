@@ -1,41 +1,9 @@
-class ColourGenerator {
-    static hue = Math.random();
-    static golden_ratio_conjugate = 0.618033988749895;
-
-    static hsv_to_rgb(h, s, v) {
-        let r, g, b, i, f, p, q, t;
-        if (arguments.length === 1) {
-            s = h.s, v = h.v, h = h.h;
-        }
-        i = Math.floor(h * 6);
-        f = h * 6 - i;
-        p = v * (1 - s);
-        q = v * (1 - f * s);
-        t = v * (1 - (1 - f) * s);
-        switch (i % 6) {
-            case 0: r = v, g = t, b = p; break;
-            case 1: r = q, g = v, b = p; break;
-            case 2: r = p, g = v, b = t; break;
-            case 3: r = p, g = q, b = v; break;
-            case 4: r = t, g = p, b = v; break;
-            case 5: r = v, g = p, b = q; break;
-        }
-
-        return `rgb(${Math.round(r * 255)},${Math.round(g * 255)},${Math.round(b * 255)})`
-
-        return {
-            r: Math.round(r * 255),
-            g: Math.round(g * 255),
-            b: Math.round(b * 255)
-        };
-    }
-
-    static generate(n) {
-        //this.hue += this.golden_ratio_conjugate;
-        //this.hue %= 1;
-        return this.hsv_to_rgb((this.hue + this.golden_ratio_conjugate * n) % 1, 0.5, 0.95);
-    }
-}
+/**
+ * 
+ * To do:
+ *  Ghost block;
+ *
+ */
 
 const game = new Game();
 const canvas = document.querySelector("canvas");
@@ -56,7 +24,8 @@ function loop() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
-    ctx.translate(game_offset_x, game_offset_y)
+    ctx.translate(game_offset_x, game_offset_y);
+    game.update();
     game.render(ctx, block_size);
     ctx.restore();
 
@@ -78,7 +47,7 @@ function loop() {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle"
     ctx.font = `${block_size * 0.5}px monospace`;
-    ctx.fillText(game.current_block, x, y, block_size * 0.9)
+    ctx.fillText(2**game.current_block, x, y, block_size * 0.9)
 
     requestAnimationFrame(loop);
 }
